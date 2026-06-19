@@ -4,25 +4,39 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Tiny Home Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Work+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    </head>
   <style>
-    .flex-container {
-    display: flex;
-    flex-wrap: wrap; /* Elements drop to the next line on smaller screens */
-    }
-
-  /* Responsive image background */
-
-    html, body { height: 100%; margin: 0; }
-    .hero-img {
-      position: fixed;
-      top: 0; left: 0;
-      height: 100vh;   /* fill height */
-      width: 100vw;    /* fill width too */
-      object-fit: fill; /* stretch */
-      z-index: -1;
-    }
+    
   </style>
-  <body>
-    <img class="hero-img" src="https://down-yuantu.pngtree.com/back_our/bg/20201005/bg/16516434e6d82_405384.jpg?e=1781862927&st=ZDUyOTBhNTMxZjFkMjFhNWU5N2FhZjNjMDcwZWRjOWM&n=%E2%80%94Pngtree%E2%80%94dark+green+cyan+paper+cut_1225583.jpg">
+  <body class="bg-img" src="/background.jpg">
+    <div class="wrapper">
+      <div class="container">
+        <div class="main-text col1">
+          <h2 style="font-size:38.5pt; text-align:center; color: #ededea;" class="work-sans-regular">Welcome</h2>
+          <h1 style="font-size:66pt; text-align:center; color: #62bfbf;" class="work-sans-regular">Tiny Home</h1>
+          <h2 style="font-size:32pt; text-align:center; color: #62bfbf;" class="work-sans-regular">Efficiency Dashboard</h2>
+          <h3 style="font-size:16pt; text-align:center; color: #ededea;" class="work-sans-regular">Cost savings and efficiency through data</h3>
+        </div>
+      </div>
+      <div class="right-panel col1">
+        <div class="login-box">
+          <h2 style="font-size:22pt; text-align:center; color: #000000;" class="work-sans-regular">Let's get started!</h2>
+          <form post="login-endpoint">
+            <label class="email-title work-sans-regular">Email</label>
+            <input class="email-field">
+            <label class="password-title work-sans-regular">Password</label>
+            <input class="password-field">
+            <br>
+            <button class="password-reset work-sans-regular">Forgot Password</button>
+            <br>
+            <button class="login-button">Login</button>
+          </form>
+        </div>
+      </div>
+    </div>
   </body>
 </html>
