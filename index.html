@@ -22,21 +22,85 @@
           <h3 style="font-size:16pt; text-align:center; color: #ededea;" class="work-sans-regular">Cost savings and efficiency through data</h3>
         </div>
       </div>
+
       <div class="right-panel col1">
-        <div class="login-box">
-          <h2 style="font-size:22pt; text-align:center; color: #000000;" class="work-sans-regular">Let's get started!</h2>
+        <div id="login-box" class="login-box">
+          <h2 style="font-size:22pt; text-align:center; color: #000000;" class="work-sans-regular">Welcome Back!</h2>
           <form post="login-endpoint">
             <label class="email-title work-sans-regular">Email</label>
             <input class="email-field">
             <label class="password-title work-sans-regular">Password</label>
             <input class="password-field">
             <br>
-            <button class="password-reset work-sans-regular">Forgot Password</button>
-            <br>
-            <button class="login-button">Login</button>
+            <a href="index.html#signup" class="password-reset work-sans-regular">Forgot Password</a></p>
+            <br><br><br><br><br>
+            <button href="#" class="login-button">Login</button>
+            <br><br><br><br>
+            <p class="signup-title work-sans-regular">Don't have an account?
+            <a href="#" onclick="signUp(event)" class="work-sans-regular">Sign up</a></p>
           </form>
         </div>
+        <div id="signup-box" class="signup-box">
+          <h2 style="font-size:22pt; text-align:center; color: #000000;" class="work-sans-regular">Let's get started!</h2>
+          <form post="login-endpoint">
+            <label class="name-title work-sans-regular">Name</label>
+            <input class="name-field">
+            <label class="email-title work-sans-regular">Email</label>
+            <input class="email-field">
+            <label class="password-title work-sans-regular">Password</label>
+            <input class="password-field">
+            <br><br><br><br><br>
+            <button href="#" class="signup-button">Create Account</button>
+            <br><br><br><br>
+            <p class="login-title work-sans-regular">Already have an account?
+            <a href="#" onclick="LogInUp(event)" class="work-sans-regular">Login</a></p>
+          </form>
+        </div>
+
       </div>
+
+        
+
     </div>
   </body>
 </html>
+
+<script>
+  const targetDiv = document.getElementById('signup-button');
+  
+  targetDiv.addEventListener('click', function() {
+    alert('Div was clicked!');
+  });
+</script>
+
+
+
+<script>
+  // The JavaScript Function
+
+  function signUp(event) {
+    event.preventDefault(); // Prevents the page from jumping
+    const logInDiv = document.getElementById("login-box");
+    const signUpDiv = document.getElementById("signup-box");
+    logInDiv.style.display = "none";
+    signUpDiv.style.display = "block";
+  }
+
+  
+  function LogInUp(event) {
+    event.preventDefault(); // Prevents the page from jumping
+    const logInDiv = document.getElementById("login-box");
+    const signUpDiv = document.getElementById("signup-box");
+    logInDiv.style.display = "block";
+    signUpDiv.style.display = "none";
+  }
+</script>
+
+<style>
+  #login-box{
+    display: block;
+  }
+  #signup-box{
+    display: none;
+  }
+</style>
