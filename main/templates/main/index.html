@@ -27,13 +27,13 @@
       <div class="right-panel col1">
         <div id="login-box" class="login-box">
           <h2 style="font-size:22pt; text-align:center; color: #000000;" class="work-sans-regular">Welcome Back!</h2>
-          <form post="login-endpoint">
+          <form method="POST" post="login-endpoint">
             <label class="email-title work-sans-regular">Email</label>
-            <input class="email-field">
+            <input class="email-field" type="email">
             <label class="password-title work-sans-regular">Password</label>
-            <input class="password-field">
+            <input class="password-field" type="password">
             <br>
-            <a href="index.html#signup" class="password-reset work-sans-regular">Forgot Password</a></p>
+            <a href="#signup" class="password-reset work-sans-regular">Forgot Password</a></p>
             <br><br><br><br><br>
             <button href="#" class="login-button">Login</button>
             <br><br><br><br>
@@ -43,7 +43,7 @@
         </div>
         <div id="signup-box" class="signup-box">
           <h2 style="font-size:22pt; text-align:center; color: #000000;" class="work-sans-regular">Let's get started!</h2>
-          <form post="login-endpoint">
+          <form method="POST" post="login-endpoint">
             <label class="name-title work-sans-regular">Name</label>
             <input class="name-field">
             <label class="email-title work-sans-regular">Email</label>
