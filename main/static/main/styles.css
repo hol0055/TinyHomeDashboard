@@ -1,0 +1,233 @@
+.flex-container {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+html, body { height: 100%; margin: 0; }
+.bg-img {
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 100vw;
+  z-index: -1;
+  background-image: url(background.jpg);
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  overflow-y: hidden;
+}
+
+.wrapper {
+  max-width: 1480px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.col1 {
+  width: 50%;
+  position: fixed;
+  height: 100vh;
+  align-content: center;
+}
+
+.container {
+  top: 30px;
+  right: 30px;
+  left: 30px;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.right-panel {
+    top: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+}
+
+.right-panel .login-box {
+    right: 30px;
+    box-sizing: border-box;
+    position: relative;
+    background: #ededea;
+    border-radius: 40px;
+    padding: 30px;
+    width: 24vw;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+}
+
+.right-panel .signup-box {
+    right: 30px;
+    box-sizing: border-box;
+    position: relative;
+    background: #ededea;
+    border-radius: 40px;
+    padding: 30px;
+    width: 24vw;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+}
+
+.email-field, .name-field {
+    right: 5px;
+    background: #ffffff;
+    box-sizing: border-box;
+    border-radius: 8px;
+    width: 20vw;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    padding-right: 10px;
+    padding-left: 10px;
+}
+
+.email-title, .name-title {
+    display: block;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    font-size: 14pt;
+}
+
+.password-field {
+    right: 5px;
+    background: #ffffff;
+    box-sizing: border-box;
+    border-radius: 8px;
+    width: 20vw;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    padding-right: 10px;
+    padding-left: 10px;
+}
+
+input:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.password-title {
+    display: block;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    font-size: 14pt;
+}
+
+.password-reset {
+    font-weight: lighter;
+    text-decoration: underline;
+    border-spacing: 20px;
+    box-sizing: border-box;
+    border: hidden;
+    float: right;
+    font-size: 14pt;
+    color: #545454;
+    padding-right: 1.5vw;
+    padding-top: 1vh;
+}
+
+
+.login-button {
+    right: 5px;
+    background: #025259;
+    box-sizing: border-box;
+    border-radius: 30px;
+    width: 9vw;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    padding-right: 10px;
+    padding-left: 10px;
+    font-family: Arial;
+    font-size: 14pt;
+    float: right;
+    color: #ffffff;
+    border-color: transparent;
+}
+
+.login-button:hover, .signup-button:hover {
+    background-color: #023a3f;
+}
+
+.signup-title {
+    display: block;
+    text-align: center;
+    font-size: 15pt;
+}
+
+.signup-title a {
+    text-decoration: none;
+    color: #000000;
+}
+
+.login-title {
+    display: block;
+    text-align: center;
+    font-size: 15pt;
+}
+
+.login-title a {
+    text-decoration: none;
+    color: #000000;
+}
+
+.signup-title a:hover {
+    text-decoration: underline;
+}
+
+.login-title a:hover {
+    text-decoration: underline;
+}
+
+.signup-button {
+    right: 5px;
+    background: #025259;
+    box-sizing: border-box;
+    border-radius: 30px;
+    width: 9vw;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    padding-right: 10px;
+    padding-left: 10px;
+    font-family: Arial;
+    font-size: 14pt;
+    float: right;
+    color: #ffffff;
+    border-color: transparent;
+    font-weight: lighter;
+    text-decoration: underline;
+    border: hidden;
+    display: block;
+    text-decoration: none;
+    list-style: none;
+}
+
+
+.main-text {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.main-text h1 {
+  line-height: 48px;
+  margin-top: 75px;
+}
+
+.main-text h2 {
+  line-height: 18px;
+}
+
+.main-text h3 {
+  line-height: 2px;
+}
+.poppins-regular {
+    font-family: "Poppins", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+}
+
+.work-sans-regular {
+    font-family: "Work Sans", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+}
