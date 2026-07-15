@@ -231,3 +231,38 @@ input:focus {
     font-weight: 400;
     font-style: normal;
 }
+
+.error-banner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+    background: #ff5252;
+    border-radius: 12px;
+    width: 25vw;
+    margin-left: 25vw;
+    margin-top: 2vh;
+    position: fixed;
+    z-index: 0;
+    height: 4vh;
+}
+
+.error-message {
+    font-weight: 600;
+    color: #ffffff;
+    font-size: 16pt;
+}
+
+.error-message a {
+    text-decoration: none;
+    margin-left: 3vw;
+    border-color: transparent;
+    background: transparent;
+    font-weight: 400;
+    color: #000000;
+    font-size: 11pt;
+}
+
+.error-message a:hover {
+    text-decoration: underline;
+}
