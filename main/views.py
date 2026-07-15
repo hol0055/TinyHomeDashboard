@@ -41,7 +41,7 @@ def login(request):
         password = request.POST.get("password")
         regex = r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,7}"
         try:
-            if re.fullmatch(regex, email) == None:
+            if re.fullmatch(regex, emailGiven) == None:
                 return render(request, "main/index.html", {"error":"You entered an invalid email address."})
         except:
             return render(request, "main/index.html", {"error":"You entered an invalid email address."})
@@ -49,14 +49,23 @@ def login(request):
             return render(request, "main/index.html", {"error":"You must enter a password."})
         
         try:
-            UserDetails.objects.get(email=emailGiven)
-            return render(request, "main/index.html", {"error":"UserDetails.objects.get(email=email)"})
-        except emailGiven.DoesNotExist:
+            user = UserDetails.objects.all() #get(email=emailGiven)
+            user_details = user.get(email=emailGiven)
+            if user_details.password == password:
+            #return render(request, "main/index.html", {"error":user_details})
+                return redirect("dashboard") #Redirect user to dashboard after validating their account details are correct
+
+        except:
             raise RuntimeError("Email does not exist")
 
         #if db_email == email:
 
 
-        return redirect("login") #Reload page after saving to database
+        return redirect("login") #Reload page after failed login
     
     return render(request, "main/index.html")
+
+def dashboard(request):
+    #if request.method =="POST":
+        #
+    return render(request, "main/dashboard.html")

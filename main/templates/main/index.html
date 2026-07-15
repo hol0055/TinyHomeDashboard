@@ -30,9 +30,9 @@
           <form method="POST" action="{% url 'login' %}">
             {% csrf_token %}
             <label class="email-title work-sans-regular">Email</label>
-            <input class="email-field" type="email">
+            <input class="email-field" type="email" name="email">
             <label class="password-title work-sans-regular">Password</label>
-            <input class="password-field" type="password">
+            <input class="password-field" type="password" name="password">
             <br>
             <a href="#signup" class="password-reset work-sans-regular">Forgot Password</a></p>
             <br><br><br><br><br>
@@ -47,11 +47,11 @@
           <form method="POST" action="{% url 'signup' %}">
             {% csrf_token %}
             <label class="name-title work-sans-regular">Name</label>
-            <input class="name-field" type="name">
+            <input class="name-field" type="name" name="name">
             <label class="email-title work-sans-regular">Email</label>
-            <input class="email-field" type="email">
+            <input class="email-field" type="email" name="email">
             <label class="password-title work-sans-regular">Password</label>
-            <input class="password-field" type="password">
+            <input class="password-field" type="password" name="password">
             <br><br><br><br><br>
             <button href="#" class="signup-button">Create Account</button>
             <br><br><br><br>
