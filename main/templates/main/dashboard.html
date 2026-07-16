@@ -6,18 +6,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Tiny Home Dashboard</title>
     <link rel="stylesheet" href="{% static 'main/styles.css' %}">
-    <link rel="stylesheet" href="{% static 'main/dash.css' %}">
+    <link rel="stylesheet" href="{% static 'main/dash.css' %}"> <!--Dashboard exclusive stylesheet-->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Work+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     </head>
 
     <body class="bg-img" src="{% static 'main/background.jpg' %}">
-        <div class="header-wrapper">
+        <div class="header-wrapper"> <!--Div to control placement of the header-->
             <div class="layout-btn">
-                <a href="#" onclick="LogIn(event)">Edit Layout</a>
+                <a href="#" onclick="LogIn(event)">Edit Layout</a> <!--I use an a element here, as they are easier to style compared to buttons.-->
+            </div>
+            <div class="btn-wrapper">
+                <div class="settings-btn">
+                    <a href="#" onclick="LogIn(event)">Settings</a> <!--Same reason for using an a element here.-->
+                </div>
+                <form method="POST" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button href="#" class="logout-btn">Logout</button> <!--Need a button to submit the form, and hence the API call-->
+                </form>
+            </div>
+        </div>
+        <div class="graph-area-wrapper">
+            <div>
+                {{ rendered_divs }}
+                <canvas id="Chart1"></canvas>
             </div>
         </div>
     </body>
 </html>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script> 
+
+<script> //BASIC GRAPH USING CHART.JS
+    const ctx = document.getElementById('Chart1');
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'], //Pull last 5 mins
+            datasets: [{
+                label: 'Time',
+                data: [12, 19, 3, 5, 2, 3],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: false
+                }
+            }
+        }
+    });
+</script>

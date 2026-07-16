@@ -15,7 +15,7 @@
   </style>
   <body class="bg-img" src="{% static 'main/background.jpg' %}">
     <div class="wrapper">
-      <div class="container">
+      <div class="container"> <!--Left panel of page, handles text positioning-->
         <div class="main-text col1">
           <h2 style="font-size:38.5pt; text-align:center; color: #ededea;" class="work-sans-regular">Welcome</h2>
           <h1 style="font-size:66pt; text-align:center; color: #62bfbf;" class="work-sans-regular">Tiny Home</h1>
@@ -25,7 +25,7 @@
       </div>
 
       <div class="right-panel col1">
-        <div id="login-box" class="login-box">
+        <div id="login-box" class="login-box"> <!--Login screen div-->
           <h2 style="font-size:22pt; text-align:center; color: #000000;" class="work-sans-regular">Welcome Back!</h2>
           <form method="POST" action="{% url 'login' %}">
             {% csrf_token %}
@@ -42,7 +42,7 @@
             <a href="#" onclick="SignUp(event)" class="work-sans-regular">Sign up</a></p>
           </form>
         </div>
-        <div id="signup-box" class="signup-box">
+        <div id="signup-box" class="signup-box"> <!--Signup screen div-->
           <h2 style="font-size:22pt; text-align:center; color: #000000;" class="work-sans-regular">Let's get started!</h2>
           <form method="POST" action="{% url 'signup' %}">
             {% csrf_token %}
@@ -61,7 +61,7 @@
         </div>
       </div>
 
-      {% if error %}
+      {% if error %} <!--Error banner, only -->
         <div id="error-banner" class="error-banner">
           <p class="error-message work-sans-regular">{{ error }}
           <a href="#" onclick="CloseBanner(event)" class="work-sans-regular">X</a></p>
@@ -85,7 +85,7 @@
 <script>
   // The JavaScript Function
 
-  function SignUp(event) {
+  function SignUp(event) { //Show signup div
     event.preventDefault(); // Prevents the page from jumping
     const logInDiv = document.getElementById("login-box");
     const signUpDiv = document.getElementById("signup-box");
@@ -94,7 +94,7 @@
   }
 
   
-  function LogIn(event) {
+  function LogIn(event) { //Show login div
     event.preventDefault(); // Prevents the page from jumping
     const logInDiv = document.getElementById("login-box");
     const signUpDiv = document.getElementById("signup-box");

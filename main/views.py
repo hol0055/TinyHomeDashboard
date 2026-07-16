@@ -3,6 +3,7 @@ from django.shortcuts import render, redirect
 # Create your views here.
 from django.http import HttpResponse
 from .models import UserDetails
+from django.utils.html import mark_safe
 
 import re
 
@@ -61,11 +62,23 @@ def login(request):
         #if db_email == email:
 
 
-        return redirect("login") #Reload page after failed login
+        return redirect("") #Reload page after failed login
     
     return render(request, "main/index.html")
 
-def dashboard(request):
-    #if request.method =="POST":
-        #
+def logout(request): #Need to implement cookie to store logged in state, & block access to dash if not present
+    if request.method =="POST":
+        return redirect("")
+    return render(request, "main/dashboard.html")
+
+def dashboard(request): #BIG WIP -- NEED GRAPHS ACTUALLY WORKING!!
+    if request.method =="POST":
+       items = [1,2,3]
+       html = "".join(
+           f'<div class="graph-div">Item {i}</div>'
+           for i in items
+       ) 
+       return render(request, "main/dashboard.html", {
+           "rendered_divs": mark_safe(html)
+       }) #mark_safe used to treat the string as trusted HTML (stops auto-escaping by Django)
     return render(request, "main/dashboard.html")

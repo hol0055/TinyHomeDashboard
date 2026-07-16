@@ -1,9 +1,10 @@
 .header-wrapper{
-    display: block;
+    display: grid;
     margin-top: 2vh;
+    column-gap: 83.9vw;
 }
 
-.layout-btn {
+.layout-btn, .settings-btn, .logout-btn {
     margin-left: 1vw;
     display: block;
     align-content: center;
@@ -22,37 +23,57 @@
     border-style: solid;
 }
 
-.layout-btn a {
+.layout-btn a, .settings-btn a, .logout-btn a {
     margin-left: 0.5vw;
     font-family: Arial;
     font-size: 11pt;
     text-decoration:none;
     list-style: none;
     color: #ffffff;
-    font-weight: 600 ;
+    font-weight: 600;
 }
 
-.layout-btn:hover {
+.layout-btn:hover, .settings-btn:hover, .logout-btn:hover {
     background-color: #286868;
 }
 
-.login-button {
-    right: 5px;
-    background: #025259;
-    box-sizing: border-box;
-    border-radius: 30px;
-    width: 9vw;
-    padding-top: 15px;
-    padding-bottom: 15px;
-    padding-right: 10px;
-    padding-left: 10px;
-    font-family: Arial;
-    font-size: 14pt;
-    float: right;
-    color: #ffffff;
-    border-color: transparent;
+.layout-btn {
+    grid-column: 1;
 }
 
-.login-button:hover, .signup-button:hover {
-    background-color: #023a3f;
+.btn-wrapper {
+    display: grid;
+    grid-column: 2;
+}
+
+.settings-btn {
+    grid-row: 1;
+}
+
+.logout-btn {
+    grid-row: 2;
+    width: 5vw;
+    margin-left: 2vw;
+    font-family: Arial;
+    font-size: 11pt;
+    text-decoration:none;
+    list-style: none;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.layout-btn a {
+    margin-left: 0.5vw;
+}
+
+.settings-btn a {
+    margin-left: 1.1vw;
+}
+
+.logout-btn a {
+    margin-left: 0.8vw;
+}
+
+.graph-area-wrapper {
+    display: flex;
 }
