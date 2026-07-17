@@ -4,6 +4,7 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from .models import UserDetails
 from django.utils.html import mark_safe
+from .models import SensorDetails
 
 import re
 
@@ -72,13 +73,50 @@ def logout(request): #Need to implement cookie to store logged in state, & block
     return render(request, "main/dashboard.html")
 
 def dashboard(request): #BIG WIP -- NEED GRAPHS ACTUALLY WORKING!!
-    if request.method =="POST":
-       items = [1,2,3]
-       html = "".join(
-           f'<div class="graph-div">Item {i}</div>'
-           for i in items
-       ) 
-       return render(request, "main/dashboard.html", {
-           "rendered_divs": mark_safe(html)
-       }) #mark_safe used to treat the string as trusted HTML (stops auto-escaping by Django)
+    #if request.method =="POST":
+    #   items = [1,2,3]
+    #   html = "".join(
+    #       f''
+    #       for i in items
+    #   ) 
+    #   return render(request, "main/dashboard.html", {
+    #       "rendered_divs": mark_safe(html)
+    #   }) #mark_safe used to treat the string as trusted HTML (stops auto-escaping by Django)
+    
+    if request.method =="GET":
+        Sensor_last5 = SensorDetails.objects.order_by("-date_time")[:5]
+        #sent_string = ""
+        values = []
+        for i in Sensor_last5:
+            #value_string = i.electricityload_value
+            #sent_string = f'{value_string},'.join(sent_string) #Append value_string onto the end of sent_string
+            values.append(i.electricityload_value)
+        electricityload_graph_api_string = "const ctx = document.getElementById('electricityload_graph');new Chart(ctx, {type: 'line',data: {labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'], datasets: [{label: 'Time',data: "+f"{values}"+",borderWidth: 1}]},options: {scales: {y: {beginAtZero: false}}}});"
+        return render(request, "main/dashboard.html", {"electricityload_graph_api": mark_safe(electricityload_graph_api_string)}) #mark_safe used to treat the string as trusted HTML (stops auto-escaping by Django)
     return render(request, "main/dashboard.html")
+
+
+
+"""
+ATTEMPT 1
+if request.method =="POST":
+        Sensor_last5 = SensorDetails.objects.order_by("-date_time")[:5]
+        Sensor = SensorDetails.objects.order_by("-date_time")
+        n = 0
+        for i in Sensor_last5:
+            n =+ 1
+            value_string = f'"electricityload_value{n}:" {str(i.electricityload_value)}'
+            sent_string = f'{value_string},'.join(sent_string) #Append value_string onto the end of sent_string
+        return render(request, "main/dashboard.html", {sent_string}) #mark_safe used to treat the string as trusted HTML (stops auto-escaping by Django)
+
+ATTEMPT 2
+if request.method =="POST":
+        Sensor_last5 = SensorDetails.objects.order_by("-date_time")[:5]
+        Sensor = SensorDetails.objects.order_by("-date_time")
+        n = 0
+        sent_string = ""
+        for i in Sensor_last5:
+            value_string = i.electricityload_value
+            sent_string = f'{value_string},'.join(sent_string) #Append value_string onto the end of sent_string
+        return render(request, "main/dashboard.html", {"electricityload_values": sent_string}) #mark_safe used to treat the string as trusted HTML (stops auto-escaping by Django)
+"""
