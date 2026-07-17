@@ -6,6 +6,7 @@ https://divyanshsingh2098.medium.com/server-side-rendering-with-react-node-js-an
 
 https://stackoverflow.com/questions/62610077/chartjs-average-line-over-bars
 
+https://stackoverflow.com/questions/20555673/django-query-get-last-n-records
 
 database changes are applied like so:
 python manage.py makemigrations {app_name}

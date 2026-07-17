@@ -84,14 +84,16 @@ def dashboard(request): #BIG WIP -- NEED GRAPHS ACTUALLY WORKING!!
     #   }) #mark_safe used to treat the string as trusted HTML (stops auto-escaping by Django)
     
     if request.method =="GET":
-        Sensor_last5 = SensorDetails.objects.order_by("-date_time")[:5]
-        #sent_string = ""
+        Sensor_last5 = SensorDetails.objects.order_by("-date_time")[:5] #Get last 5 entries in the SensorDetails table
         values = []
+        times = []
         for i in Sensor_last5:
-            #value_string = i.electricityload_value
-            #sent_string = f'{value_string},'.join(sent_string) #Append value_string onto the end of sent_string
-            values.append(i.electricityload_value)
-        electricityload_graph_api_string = "const ctx = document.getElementById('electricityload_graph');new Chart(ctx, {type: 'line',data: {labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'], datasets: [{label: 'Time',data: "+f"{values}"+",borderWidth: 1}]},options: {scales: {y: {beginAtZero: false}}}});"
+            values.append(i.electricityload_value) #Add each entry's electricityload_value to the list
+            times.append(f"{str(i.date_time.strftime("%H:%M"))}") #Add the time of each entry to the list
+        #Have to pass the code like this unfortunately, as im attempting to pass json as text in python...
+        #Essentially, this line defines the graph, its data set, labels, and other qualities
+        electricityload_graph_api_string = "const ctx = document.getElementById('electricityload_graph');new Chart(ctx, {type: 'line',data: {labels: "+f"{times}"+", datasets: [{label: 'Load (W)',data: "+f"{values}"+",borderWidth: 1}]},options: {scales: {y: {beginAtZero: false}}}});"
+        #I then render the graph by passing it through to the frontend under the variable electricityload_graph_api, allowing me to directly render the code onto the page!
         return render(request, "main/dashboard.html", {"electricityload_graph_api": mark_safe(electricityload_graph_api_string)}) #mark_safe used to treat the string as trusted HTML (stops auto-escaping by Django)
     return render(request, "main/dashboard.html")
 
