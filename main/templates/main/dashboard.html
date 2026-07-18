@@ -14,6 +14,8 @@
     </head>
 
     <body class="bg-img" src="{% static 'main/background.jpg' %}">
+     
+        <div id="content">
         <div class="header-wrapper"> <!--Div to control placement of the header-->
             <div class="layout-btn">
                 <a href="#" onclick="LogIn(event)">Edit Layout</a> <!--I use an a element here, as they are easier to style compared to buttons.-->
@@ -28,6 +30,9 @@
                 </form>
             </div>
         </div>
+
+  <div id="dashboard">
+
         <!--COL1-->
         <div id="col1">
             <div class="graph-row">
@@ -58,26 +63,32 @@
             </div>
             <!--ROW2 NEXT-->
             <div class="graph-row">
-                <div class="graph-area-wrapper">
-                    <div class="rawDataDisplay-wrapper">
-                        <div>Raw Data Display</div>
-                        <div>Filter by:</div>
-                        <div>Sort by:</div>
-                        <div class="dataWrapper">
-                            <div class="fieldType">
-                                <p class="work-sans-regular">Type</p>
-                            </div>
-                            <div class="fieldDateTime">
-                                <p class="work-sans-regular">Date & Time</p>
-                            </div>
-                            <div class="fieldValue">
-                                <p class="work-sans-regular">Value</p>
-                            </div>
+                <div class="rawDataDisplay-wrapper">
+                    <div class="dataDisplayTop">
+                        <div class="dataText work-sans-regular">Raw Data Display</div>
+                        <div class="filterText work-sans-regular" style="display: grid;">
+                            <a style="grid-column: 1; grid-row: 1;">Filter by:</a>
+                            <a style="grid-column: 2; grid-row: 1;" onclick="Filter(event)" class="work-sans-regular">{{ rawDataDisplay_filter }}</a>
                         </div>
-                        <script>
-                            {{ rawDataDisplay_api }}
-                        </script>
+                        <div class="sortText work-sans-regular" style="display: grid;">
+                            <a style="grid-column: 1; grid-row: 1;">Sort by:</a>
+                            <a style="grid-column: 2; grid-row: 1;" onclick="Sort(event)" class="work-sans-regular">{{ rawDataDisplay_sort }}</a>
+                        </div>
                     </div>
+                    <div class="dataWrapper">
+                        <div class="fieldType">
+                            <p class="work-sans-regular">Type</p>
+                        </div>
+                        <div class="fieldDateTime">
+                            <p class="work-sans-regular">Date & Time</p>
+                        </div>
+                        <div class="fieldValue">
+                            <p class="work-sans-regular">Value</p>
+                        </div>
+                    </div>
+                    <script>
+                        {{ rawDataDisplay_api }}
+                    </script>
                 </div>
                 <div class="graph-area-wrapper">
                     <div class="elec-graph-wrapper">
@@ -88,7 +99,7 @@
                     </div>
                 </div>
             </div>
-            <!--ROW3 NEXT-->
+            <!--ROW3 NEXT (CUSTOM)-->
             <div class="graph-row">
                 <div class="graph-area-wrapper">
                     <div class="elec-graph-wrapper">
@@ -115,6 +126,14 @@
                     </div>
                 </div>
             </div>
+            <!--ROW4 NEXT-->
+            <div class="graph-row">
+                <div class="breakdown-area-wrapper">
+                    <script>
+                        {{ breakdown_api }}
+                    </script>
+                </div>
+            </div>
         </div>
         <!--COL2-->
         <div id="col2">
@@ -133,11 +152,13 @@
                 </div>
             </div>
         </div>
+    </div>
+        </div>
         <style>
-            .elec-graph-wrapper {
+            /* .elec-graph-wrapper {
                 display: inline-flex;
                 width: 100%;
-                height: 450px;
+                height: {{ graphHeight }};
                 align-items: center;
                 justify-content: center;
                 padding: 0;
@@ -161,7 +182,7 @@
                 display: flex;
                 flex-direction: column;
                 align-items: stretch;
-                height: 450px;
+                height: {{ graphHeight }};
                 margin-left: 50px;
             }
             .stack-area-wrapper {
@@ -176,10 +197,10 @@
                 text-align: center;
                 margin-left: auto;
                 margin-right: auto;
-                margin-bottom: 50px;
-                height: auto;
+                margin-bottom: 10px;
+                height: auto; */
                 /*Let graphs inside define the row height*/
-                display: flex;
+                /* display: flex;
                 flex-wrap: wrap;
                 align-items: stretch;
                 min-height: 0;
@@ -209,11 +230,204 @@
                 width:300px;
             }
             .graph{
-                width: 450px !important;
-                height: 450px !important;
-                max-width: 450px !important;
-                max-height: 450px !important;
+                width: {{ graphWidth }} !important;
+                height: {{ graphHeight }} !important;
+                max-width: {{ graphWidth }} !important;
+                max-height: {{ graphHeight }} !important;
                 display: block;
+            }
+
+            .breakdown-area-wrapper {
+                background-color: white;
+                width: 50vw;
+                display: block;
+                flex-direction: column;
+                align-items: stretch;
+                height: {{ graphHeight }};
+                margin-left: 50px;
+                border-radius: 12px;
+            } */
+
+
+            
+            *{
+                margin:0;
+                padding:0;
+                box-sizing:border-box;
+            }
+
+
+            .bg-img{
+                background-size: 110% 120%;
+                background-repeat: no-repeat;
+                background-position: center;
+                position: absolute;
+            }
+
+            /* ------MAIN DASHBOARD------ */
+
+            #dashboard{
+                display:grid;
+                grid-template-columns:4fr 1fr;
+                gap:20px;
+                align-items:start;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+            }
+
+            /* ------LEFT COLUMN------ */
+
+            #col1{
+                display:flex;
+                flex-direction:column;
+                gap:25px;
+            }
+
+            /* Each row contains 3 graphs */
+
+            #graph-row{
+                display:grid;
+                grid-template-columns:repeat(3,1fr);
+                gap:20px;
+            }
+
+            /* Graph styling */
+
+            .graph-area-wrapper{
+                width:100%;
+            }
+
+            .elec-graph-wrapper{
+                background:#ffffff;
+                border-radius:30px;
+                padding:20px;
+                width:100%;
+                aspect-ratio:1.35;
+                display:flex;
+                justify-content:center;
+                align-items:center;
+                box-shadow:0 5px 18px rgba(0,0,0,.15);
+
+            }
+
+            /* Graph canvas */
+
+            /* .graph{
+                width:100% !important;
+                height:100% !important;
+
+            } */
+            .graph{ /*Theres a load of errors for me here, I can't do anything about them. Django var passing, that whole ordeal...*/
+                    width: {{ graphWidth }} !important;
+                    height: {{ graphHeight }} !important;
+                    max-width: {{ graphWidth }} !important;
+                    max-height: {{ graphHeight }} !important;
+                    display: block;
+                }
+
+
+            /* -----RIGHT COLUMN----- */
+
+            #col2{
+                display:flex;
+                flex-direction:column;
+                gap:30px;
+                margin-left: 2vw;
+            }
+
+            /* Wrapper styling */
+
+            .stack-area-wrapper{
+                width:100%;
+            }
+
+            /* Insights styling */
+
+            .stack-insights-wrapper{
+                background:#ffffff;
+                border-radius:35px;
+                /*min-height:260px;
+                width: 100%;
+                max-width: 360px;
+                aspect-ratio: 1;*/
+                padding:25px;
+                display:flex;
+                justify-content:center;
+                align-items:center;
+                text-align:center;
+                box-shadow:0 5px 18px rgba(0,0,0,.15);
+                width: 15vw;
+                min-height: 50vh;
+                margin-top: 2vh;
+                margin-bottom: 4vh;
+            }
+
+            /* Statistics styling */
+
+            .stack-stats-wrapper{
+                background:#ffffff;
+                border-radius:50%;
+                aspect-ratio:1;
+                width:100%;
+                max-width:360px;
+                margin:auto;
+                display:flex;
+                justify-content:center;
+                align-items:center;
+                text-align:center;
+                box-shadow:0 5px 18px rgba(0,0,0,.15);
+            }
+
+
+
+
+            /* ------RESPONSIVE STYLING STUFF------ */
+
+            /* Large Screens */
+
+            @media (max-width:1200px){
+
+                #dashboard{
+                    grid-template-columns:1fr;
+                }
+
+                #col2{
+
+                    flex-direction:row;
+                    justify-content:center;
+                    align-items:stretch;
+                }
+
+                .stack-area-wrapper{
+                    flex:1;
+                }
+
+            }
+
+            /* Tablets/Medium screens */
+
+            @media (max-width:900px){
+
+                #graph-row{
+                grid-template-columns:repeat(2,1fr);
+                }
+
+                #col2{
+                    flex-direction:column;
+                }
+
+            }
+
+
+            .graph-row{
+                display:grid;
+                grid-template-columns:repeat(3,1fr);
+                gap:30px;
+            }
+
+            .bg-img {
+                overflow-y:  inherit!important;
             }
         </style>
         <script>
@@ -228,59 +442,91 @@
     </body>
 </html>
 
-<!--<script> //BASIC GRAPH USING CHART.JS
-    const ctx = document.getElementById('Chart1');
+<!-- Sort/Filter button handlers-->
+<script>
+(() => {
+  const FILTER_STOP_AT = 10; //Stops incrementing here, loops back over
+  const FILTER_STEP = 1; //how many steps to skip when looping
+  let FILTER_counter = 0; //Start value (or pull from current UI state)
+  const FILTER_endpoint = "/dashboard"; //API endpoint
 
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'], //Pull last 5 mins
-            datasets: [{
-                label: 'Time',
-                data: {{ electricityload_values }} ,
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                title: {
-                    display: true,
-                    text: 'Electricity Load',
-                    color: '#000000',
-                    font: {
-                        size: 20,
-                        weight: 'bold',
-                        family: 'Helvetica'
-                    },
-                    padding: { top: 10, bottom: 30 }
-                }
-            },
-            scales: {
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Time',
-                        color: '#000000',
-                        font: {
-                            size: 14,
-                            weight: 'normal'
-                        }
-                    }
-                },
-                y: {
-                    beginAtZero: false,
-                    title: {
-                        display: true,
-                        text: 'Load (W)',
-                        color: '#000000',
-                        font: {
-                            size: 14,
-                            weight: 'normal'
-                        }
-                    }
-                }
-            }
-        }
+  const SORT_STOP_AT = 10; //Stops incrementing here, loops back over
+  const SORT_STEP = 1; //how many steps to skip when looping
+  let SORT_counter = 0; //Start value (or pull from current UI state)
+  const SORT_endpoint = "/dashboard"; //API endpoint
+
+  function nextSortCounter() {
+    SORT_counter = SORT_counter + SORT_STEP;
+    if (SORT_counter > SORT_STOP_AT) SORT_counter = 0; //Loop back over
+    return SORT_counter;
+  }
+
+  function nextFilterCounter() {
+    FILTER_counter = FILTER_counter + FILTER_STEP;
+    if (FILTER_counter > FILTER_STOP_AT) FILTER_counter = 0; //Loop back over
+    return FILTER_counter;
+  }
+
+  async function postSortContext(n) {
+    const payload = { number: n }; //context containing the number
+
+    const res = await fetch(SORT_endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Requested-With": "XMLHttpRequest",
+        "X-CSRFToken": getCSRFToken()
+      },
+      body: JSON.stringify(payload),
+      credentials: "same-origin"
     });
-</script>-->
+
+    if (!res.ok) { //Catch errors
+      const text = await res.text().catch(() => "");
+      throw new Error(`POST failed: ${res.status} ${text}`);
+    }
+  }
+  async function postFilterContext(n) {
+    const payload = { number: n }; //context containing the number
+
+    const res = await fetch(FILTER_endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Requested-With": "XMLHttpRequest",
+        "X-CSRFToken": getCSRFToken()
+      },
+      body: JSON.stringify(payload),
+      credentials: "same-origin"
+    });
+
+    if (!res.ok) { //Catch errors
+      const text = await res.text().catch(() => "");
+      throw new Error(`POST failed: ${res.status} ${text}`);
+    }
+  }
+
+  //Django CSRF read from cookie
+  function getCSRFToken() {
+    const name = "csrftoken";
+    const cookies = document.cookie ? document.cookie.split(";") : [];
+    for (const c of cookies) {
+      const cookie = c.trim();
+      if (cookie.startsWith(name + "=")) {
+        return decodeURIComponent(cookie.substring(name.length + 1)); //Pull the actual value
+      }
+    }
+    return "";
+  }
+
+  window.Sort = async function Sort() { //Actual function thats called by the button
+    const n = nextSortCounter();
+    return postSortContext(n);
+  };
+  window.Filter = async function Filter() { //Actual function thats called by the button
+    const n = nextFilterCounter();
+    return postFilterContext(n);
+  };
+
+})();
+</script>

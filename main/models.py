@@ -46,3 +46,14 @@ class WeatherPulled(models.Model):
 
     def __str__(self):
         return str(self.day)
+    
+class Misc(models.Model):
+    text_id = models.TextField(primary_key=True)
+    filter_value = models.IntegerField(default=0)
+    sort_value = models.IntegerField(default=0)
+
+    class Meta:
+        db_table = "misc"
+
+    def __str__(self):
+        return self.text_id

@@ -1,6 +1,6 @@
 .header-wrapper{
     display: grid;
-    margin-top: 2vh;
+    margin-top: 1vh;
     column-gap: 83.9vw;
 }
 
@@ -74,33 +74,150 @@
     margin-left: 0.8vw;
 }
 
-
-
 .rawDataDisplay-wrapper{
     background-color: white;
-    max-width: 66.66%;
-    background-color: green;
-    display: inline-flex;
-    margin-left: 50px;
+    width: 100%;
+    width: 40vw;
+    display: block;
+    border-radius: 12px;
 }
 
 .dataWrapper {
     max-width: 100%;
-    margin-top: 20vh;
+    display: grid;
+    grid-row: 2;
+    height: 17.2vh;
+}
+
+.dataDisplayTop {
+    display: grid;
+    height: 4vh;
+    grid-row: 1;
+}
+
+.dataText {
+    display: inline;
+    grid-column: 2;
+    justify-content: center;
+    width: 100%;
+    height: 2vh;
+    grid-row: 1;
+    text-align: center;
+    font-size: 16pt;
+    font-weight: bold;
+}
+.filterText {
+    display: -ms-inline-grid;
+    grid-column: 1;
+    float: left;
+    max-height: 2vh;
+    margin-top: 2vh;
+    font-size: 12pt; /*Yes I know its not 10pt like the mock up says, decided that was too small after I made the page more responsive*/
+}
+.sortText {
+    grid-column: 3;
+    display: -ms-inline-grid;
+    float: right;
+    height: 2vh;
+    grid-row: 1;
+    margin-top: 2vh;
+    font-size: 12pt; /*Yes I know its not 10pt like the mock up says, decided that was too small after I made the page more responsive*/
+}
+
+.filterText a {
+    grid-row: 1;
 }
 
 .fieldType {
-
+    grid-column: 1;
 }
 
 .fieldDateName {
-
+    grid-column: 2;
 }
 
 .fieldValue {
+    grid-column: 3;
+}
+
+.fieldType p, .fieldDateTime p, .fieldValue p {
+    font-size: 14pt;
+    text-align: center;
+}
+
+/*---------------- RESPONSIVE CSS STUFF ----------------*/
+
+/* Large screens */
+@media (max-width:1200px){
+
+    #dashboard{
+
+        grid-template-columns:1fr;
+
+    }
+
+    #col2{
+
+        flex-direction:row;
+
+        justify-content:center;
+
+        align-items:stretch;
+
+    }
+
+    .stack-area-wrapper{
+
+        flex:1;
+
+    }
 
 }
 
-.fieldType p, .fieldDateName p, .fieldValue p {
-    font-size: 14pt;
+/* Tablets/Medium screens */
+
+@media (max-width:900px){
+
+    #graph-row{
+
+        grid-template-columns:repeat(2,1fr);
+
+    }
+
+    #col2{
+
+        flex-direction:column;
+
+    }
+
+}
+
+/* Phones */
+
+@media (max-width:650px){
+
+    body{
+
+        padding:15px;
+
+    }
+
+    #graph-row{
+
+        grid-template-columns:1fr;
+
+    }
+
+    .elec-graph-wrapper{
+
+        aspect-ratio:1.4;
+
+    }
+
+    .stack-insights-wrapper{
+
+        min-height:220px;
+
+    }
+
 }

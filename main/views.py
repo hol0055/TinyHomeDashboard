@@ -5,6 +5,7 @@ from django.http import HttpResponse
 from .models import UserDetails
 from django.utils.html import mark_safe
 from .models import SensorDetails
+from .models import Misc
 
 import re
 
@@ -72,18 +73,34 @@ def logout(request): #Need to implement cookie to store logged in state, & block
         return redirect("")
     return render(request, "main/dashboard.html")
 
-def dashboard(request): #BIG WIP -- NEED GRAPHS ACTUALLY WORKING!!
-    #if request.method =="POST":
-    #   items = [1,2,3]
-    #   html = "".join(
-    #       f''
-    #       for i in items
-    #   ) 
-    #   return render(request, "main/dashboard.html", {
-    #       "rendered_divs": mark_safe(html)
-    #   }) #mark_safe used to treat the string as trusted HTML (stops auto-escaping by Django)
-    
+def filter(request):
+    if request.method =="POST":
+        filter_n = request.json()
+        Misc.objects.get(pk=1)
+        Misc.filter_value = filter_n
+        Misc.save("filter_value")
+        return render(request, "main/dashboard.html")
+
+def sort(request):
+    if request.method =="POST":
+        sort_n = request.json()
+        Misc.objects.get(pk=1)
+        Misc.sort_value = sort_n
+        Misc.save("sort_value")
+        return render(request, "main/dashboard.html")
+
+def dashboard(request):
     if request.method =="GET":
+        graphHeight = "250px"
+        graphWidth = "350px"
+        customGraphs = ''
+        if customGraphs != 0:
+            graphHeight = "200px"
+            graphWidth = "300px"
+            
+        filter_n = Misc.objects.get(pk=1).filter_value #Get filter and sort value from pk=0 in misc table
+        sort_n = Misc.objects.get(pk=1).sort_value
+
         Sensor_last5 = SensorDetails.objects.order_by("-date_time")[:5] #Get last 5 entries in the SensorDetails table
         elecLoadValues = []
         waterValues = []
@@ -101,15 +118,19 @@ def dashboard(request): #BIG WIP -- NEED GRAPHS ACTUALLY WORKING!!
         #Have to pass the code like this unfortunately, as im attempting to pass json as text in python...
         #Essentially, this line calls the makeGraph function, defining the graph, its data set, labels, and other qualities
         battVsSolar_graph_api_string = makeMixedGraph("battVsSolar_graph", "Battery Charge VS Solar Output", "Time", "Output (W)", "Battery Output (W)", "Solar Output (W)", times, batteryValues, solarValues)
-        electricityload_graph_api_string = makeGraph("electricityload_graph", "Electricity Load", "Time", "Load (W)", elecLoadValues, times)
-        waterUsage_graph_api_string = makeGraph("waterUsage_graph", "Water Usage", "Time", "Water Used (L)", waterValues, times)
-        gasUsage_graph_api_string = makeGraph("gasUsage_graph", "Gas Usage", "Time", "Gas Used (L)", gasValues, times)
+        electricityload_graph_api_string = makeGraph("electricityload_graph", "Electricity Load", "Time", "Load (W)", times, elecLoadValues)
+        waterUsage_graph_api_string = makeGraph("waterUsage_graph", "Water Usage", "Time", "Water Used (L)", times, waterValues)
+        gasUsage_graph_api_string = makeGraph("gasUsage_graph", "Gas Usage", "Time", "Gas Used (L)", times, gasValues)
         #I then render the graph by passing it through to the frontend under the variable electricityload_graph_api, allowing me to directly render the code onto the page!
         return render(request, "main/dashboard.html", {
             "battVsSolar_graph_api": mark_safe(battVsSolar_graph_api_string),
             "electricityload_graph_api": mark_safe(electricityload_graph_api_string),
             "waterUsage_graph_api": mark_safe(waterUsage_graph_api_string),
-            "gasUsage_graph_api": mark_safe(gasUsage_graph_api_string)
+            "gasUsage_graph_api": mark_safe(gasUsage_graph_api_string),
+            "graphHeight": graphHeight,
+            "graphWidth": graphWidth,
+            "rawDataDisplay_filter": filter_n,
+            "rawDataDisplay_sort": sort_n
             }) #mark_safe used to treat the string as trusted HTML (stops auto-escaping by Django)
     return render(request, "main/dashboard.html")
 
@@ -159,13 +180,13 @@ options: {{
             text: '{title}',
             color: '#000000',
             font: {{
-                size: 20,
+                size: 16,
                 weight: 'bold',
                 family: 'Helvetica'
             }},
             padding: {{
                 top: 10,
-                bottom: 30
+                bottom: 10
             }}
         }}
     }},
@@ -197,8 +218,7 @@ options: {{
 }}
 }});
 '''
-'''{graph}_ctx.style.width = '450';
-{graph}_ctx.style.height = '450';'''
+
 def makeMixedGraph(graph, title, labelx, labely, labely1, labely2, valuesx, valuesy1, valuesy2):
     return f'''
 const ctx = document.getElementById('{graph}');
@@ -227,13 +247,13 @@ options: {{
             text: '{title}',
             color: '#000000',
             font: {{
-                size: 20,
+                size: 16,
                 weight: 'bold',
                 family: 'Helvetica'
             }},
             padding: {{
                 top: 10,
-                bottom: 30
+                bottom: 10
             }}
         }}
     }},
