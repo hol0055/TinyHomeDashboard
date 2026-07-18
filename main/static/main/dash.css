@@ -74,6 +74,33 @@
     margin-left: 0.8vw;
 }
 
-.graph-area-wrapper {
-    display: flex;
+
+
+.rawDataDisplay-wrapper{
+    background-color: white;
+    max-width: 66.66%;
+    background-color: green;
+    display: inline-flex;
+    margin-left: 50px;
+}
+
+.dataWrapper {
+    max-width: 100%;
+    margin-top: 20vh;
+}
+
+.fieldType {
+
+}
+
+.fieldDateName {
+
+}
+
+.fieldValue {
+
+}
+
+.fieldType p, .fieldDateName p, .fieldValue p {
+    font-size: 14pt;
 }

@@ -28,19 +28,207 @@
                 </form>
             </div>
         </div>
-        <div class="graph-area-wrapper">
-            <div>
-                <canvas id="electricityload_graph"></canvas>
-                <script>
-                    {{ electricityload_graph_api }}
-                </script>
+        <!--COL1-->
+        <div id="col1">
+            <div class="graph-row">
+                <div class="graph-area-wrapper">
+                    <div class="elec-graph-wrapper">
+                        <canvas id="battVsSolar_graph" class="graph"></canvas>
+                        <script>
+                            {{ battVsSolar_graph_api }}
+                        </script>
+                    </div>
+                </div>
+                <div class="graph-area-wrapper">
+                    <div class="elec-graph-wrapper">
+                        <canvas id="electricityload_graph" class="graph"></canvas>
+                        <script>
+                            {{ electricityload_graph_api }}
+                        </script>
+                    </div>
+                </div>
+                <div class="graph-area-wrapper">
+                    <div class="elec-graph-wrapper">
+                        <canvas id="waterUsage_graph" class="graph"></canvas>
+                        <script>
+                            {{ waterUsage_graph_api }}
+                        </script>
+                    </div>
+                </div>
+            </div>
+            <!--ROW2 NEXT-->
+            <div class="graph-row">
+                <div class="graph-area-wrapper">
+                    <div class="rawDataDisplay-wrapper">
+                        <div>Raw Data Display</div>
+                        <div>Filter by:</div>
+                        <div>Sort by:</div>
+                        <div class="dataWrapper">
+                            <div class="fieldType">
+                                <p class="work-sans-regular">Type</p>
+                            </div>
+                            <div class="fieldDateTime">
+                                <p class="work-sans-regular">Date & Time</p>
+                            </div>
+                            <div class="fieldValue">
+                                <p class="work-sans-regular">Value</p>
+                            </div>
+                        </div>
+                        <script>
+                            {{ rawDataDisplay_api }}
+                        </script>
+                    </div>
+                </div>
+                <div class="graph-area-wrapper">
+                    <div class="elec-graph-wrapper">
+                        <canvas id="gasUsage_graph" class="graph"></canvas>
+                        <script>
+                            {{ gasUsage_graph_api }}
+                        </script>
+                    </div>
+                </div>
+            </div>
+            <!--ROW3 NEXT-->
+            <div class="graph-row">
+                <div class="graph-area-wrapper">
+                    <div class="elec-graph-wrapper">
+                        <canvas id="electricityload_graph1" class="graph"></canvas>
+                        <script>
+                            {{ electricityload_graph_api1 }}
+                        </script>
+                    </div>
+                </div>
+                <div class="graph-area-wrapper">
+                    <div class="elec-graph-wrapper">
+                        <canvas id="electricityload_graph2" class="graph"></canvas>
+                        <script>
+                            {{ electricityload_graph_api2 }}
+                        </script>
+                    </div>
+                </div>
+                <div class="graph-area-wrapper">
+                    <div class="elec-graph-wrapper">
+                        <canvas id="electricityload_graph3" class="graph"></canvas>
+                        <script>
+                            {{ electricityload_graph_api3 }}
+                        </script>
+                    </div>
+                </div>
             </div>
         </div>
+        <!--COL2-->
+        <div id="col2">
+            <div class="stack-area-wrapper">
+                <div class="stack-insights-wrapper">
+                    <script>
+                        {{ insights_api }}
+                    </script>
+                </div>
+            </div>
+            <div class="stack-area-wrapper">
+                <div class="stack-stats-wrapper">
+                    <script>
+                        {{ stats_api }}
+                    </script>
+                </div>
+            </div>
+        </div>
+        <style>
+            .elec-graph-wrapper {
+                display: inline-flex;
+                width: 100%;
+                height: 450px;
+                align-items: center;
+                justify-content: center;
+                padding: 0;
+                margin: 0;
+                background-color: #ffffff;
+                border-radius: 12px;
+                text-align: center;
+                vertical-align: middle;
+            }
+            .stack-graph-wrapper {
+                display: inline-block;
+                background-color: #ffffff;
+                border-radius: 12px;
+                text-align: center;
+                vertical-align: middle;
+            }
+            .graph-area-wrapper {
+                background-color: white;
+                max-width: 33.33%;
+                background-color: green;
+                display: flex;
+                flex-direction: column;
+                align-items: stretch;
+                height: 450px;
+                margin-left: 50px;
+            }
+            .stack-area-wrapper {
+                background-color: white;
+                max-width: 100%;
+                background-color: green;
+                margin-left: 50px;
+            }
+            .graph-row {
+                max-width: 80vw;
+                background-color: yellow;
+                text-align: center;
+                margin-left: auto;
+                margin-right: auto;
+                margin-bottom: 50px;
+                height: auto;
+                /*Let graphs inside define the row height*/
+                display: flex;
+                flex-wrap: wrap;
+                align-items: stretch;
+                min-height: 0;
+            }
+            #col1 {
+                width: 80%;
+                float: left;
+                background-color: pink;
+                height: 87%;
+            }
+            #col2 {
+                background-color: white;
+                display: inline-block;
+            }
+            .stack-insights-wrapper {
+                border-radius: 50px;
+                width: 100%;
+                height: 40vh;
+                background-color: red;
+                margin-bottom: 13.4vh;
+                margin-top: 2vh;
+            }
+            .stack-stats-wrapper {
+                border-radius: 100%;
+                background-color: red;
+                height:300px;
+                width:300px;
+            }
+            .graph{
+                width: 450px !important;
+                height: 450px !important;
+                max-width: 450px !important;
+                max-height: 450px !important;
+                display: block;
+            }
+        </style>
+        <script>
+            window.addEventListener('load', () => {
+                if (!window.Chart) return;
+                //Resize all graphs after the rest of the page is displayed
+                for (const instance of Object.values(Chart.instance || {})) {
+                    instance.resize();
+                }
+            });
+        </script>
     </body>
 </html>
 
-<!--
-<script> //BASIC GRAPH USING CHART.JS
+<!--<script> //BASIC GRAPH USING CHART.JS
     const ctx = document.getElementById('Chart1');
 
     new Chart(ctx, {
@@ -54,12 +242,45 @@
             }]
         },
         options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Electricity Load',
+                    color: '#000000',
+                    font: {
+                        size: 20,
+                        weight: 'bold',
+                        family: 'Helvetica'
+                    },
+                    padding: { top: 10, bottom: 30 }
+                }
+            },
             scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Time',
+                        color: '#000000',
+                        font: {
+                            size: 14,
+                            weight: 'normal'
+                        }
+                    }
+                },
                 y: {
-                    beginAtZero: false
+                    beginAtZero: false,
+                    title: {
+                        display: true,
+                        text: 'Load (W)',
+                        color: '#000000',
+                        font: {
+                            size: 14,
+                            weight: 'normal'
+                        }
+                    }
                 }
             }
         }
     });
-</script>
--->
+</script>-->
