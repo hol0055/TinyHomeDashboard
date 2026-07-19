@@ -84,6 +84,8 @@ def filter(request):
         #with open("output.txt", "w", encoding="utf-8") as f:
         #    f.write(str(data.get("number")))
         Misc.objects.filter(text_id=1).update(filter_value=str(data.get("number")))
+        #Misc.objects.filter(text_id=1).update(ran_End=str(data.get("rdd_EndRan")))
+        #Misc.objects.filter(text_id=1).update(ran_Start=str(data.get("rdd_StartRan")))
         #response = HttpResponseRedirect(reverse("dashboard"))
         #response['Refresh'] = '0'
         #return response
@@ -99,7 +101,7 @@ def sort(request):
     if request.method =="GET":
         return redirect("dashboard")
 
-def rdd_filter(list, f_type, filter='None', ranStart='0.0', ranEnd='3.0'):
+def rdd_filter(list, f_type, filter='None', ranStart=0, ranEnd=3):
     if f_type == 'None':
         with open("output.txt", "a", encoding="utf-8") as f:
             f.write(str(list))
@@ -153,7 +155,8 @@ def dashboard(request):
         filter_n = Misc.objects.get(text_id=1).filter_value #Get filter and sort value from pk=1 in misc table
         sort_n = Misc.objects.get(text_id=1).sort_value
         rdd_type = Misc.objects.get(text_id=1).filter_type
-        rdd_range = Misc.objects.get(text_id=1).filter_range
+        rdd_StartRan = Misc.objects.get(text_id=1).ran_Start
+        rdd_EndRan = Misc.objects.get(text_id=1).ran_End
 
         match filter_n:
             case 0: 
@@ -161,7 +164,7 @@ def dashboard(request):
                 filtered_list = rdd_filter(AllData, filter_type)
             case 1:
                 filter_type = 'Range'
-                filtered_list = rdd_filter(AllData, filter_type, rdd_range)
+                filtered_list = rdd_filter(AllData, filter_type, rdd_StartRan, rdd_EndRan)
             case 2:
                 filter_type = 'Type'
                 filtered_list = rdd_filter(AllData, filter_type, rdd_type)
@@ -182,7 +185,6 @@ def dashboard(request):
                 sort_type = 'Alphabetical'
                 rdd_sort(AllData, sort_type)
         
-
 
         Sensor_last5 = SensorDetails.objects.order_by("-date_time")[:5] #Get last 5 entries in the SensorDetails table
         elecLoadValues = []
@@ -205,7 +207,38 @@ def dashboard(request):
         waterUsage_graph_api_string = makeGraph("waterUsage_graph", "Water Usage", "Time", "Water Used (L)", times, waterValues)
         gasUsage_graph_api_string = makeGraph("gasUsage_graph", "Gas Usage", "Time", "Gas Used (L)", times, gasValues)
         #I then render the graph by passing it through to the frontend under the variable electricityload_graph_api, allowing me to directly render the code onto the page!
-        response = render(request, "main/dashboard.html", {
+        if filter_type == 'Range':
+            response = render(request, "main/dashboard.html", {
+            "battVsSolar_graph_api": mark_safe(battVsSolar_graph_api_string),
+            "electricityload_graph_api": mark_safe(electricityload_graph_api_string),
+            "waterUsage_graph_api": mark_safe(waterUsage_graph_api_string),
+            "gasUsage_graph_api": mark_safe(gasUsage_graph_api_string),
+            "graphHeight": graphHeight,
+            "graphWidth": graphWidth,
+            "rawDataDisplay_filter": filter_type,
+            "rawDataDisplay_sort": sort_type,
+            "rawDataDisplay_filter_n": filter_n,
+            "rawDataDisplay_sort_n": sort_n,
+            "rawDataDisplay_value_list": filtered_list,
+            "rawDataDisplay_filter_isRan":"True"
+            }) #mark_safe used to treat the string as trusted HTML (stops auto-escaping by Django)
+        elif filter_type == 'Type':
+            response = render(request, "main/dashboard.html", {
+            "battVsSolar_graph_api": mark_safe(battVsSolar_graph_api_string),
+            "electricityload_graph_api": mark_safe(electricityload_graph_api_string),
+            "waterUsage_graph_api": mark_safe(waterUsage_graph_api_string),
+            "gasUsage_graph_api": mark_safe(gasUsage_graph_api_string),
+            "graphHeight": graphHeight,
+            "graphWidth": graphWidth,
+            "rawDataDisplay_filter": filter_type,
+            "rawDataDisplay_sort": sort_type,
+            "rawDataDisplay_filter_n": filter_n,
+            "rawDataDisplay_sort_n": sort_n,
+            "rawDataDisplay_value_list": filtered_list,
+            "rawDataDisplay_filter_isType":"True"
+            }) #mark_safe used to treat the string as trusted HTML (stops auto-escaping by Django)
+        else:
+            response = render(request, "main/dashboard.html", {
             "battVsSolar_graph_api": mark_safe(battVsSolar_graph_api_string),
             "electricityload_graph_api": mark_safe(electricityload_graph_api_string),
             "waterUsage_graph_api": mark_safe(waterUsage_graph_api_string),

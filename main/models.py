@@ -52,7 +52,8 @@ class Misc(models.Model):
     filter_value = models.IntegerField(default=0)
     sort_value = models.IntegerField(default=0)
     filter_type = models.TextField(null=True, blank=True)
-    filter_range = models.TextField(null=True, blank=True)
+    ran_Start = models.FloatField(default=0)
+    ran_End = models.FloatField(default=0)
 
     class Meta:
         db_table = "misc"

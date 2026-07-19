@@ -72,6 +72,12 @@
                         <div class="filterText work-sans-regular" style="display: grid;">
                             <a style="grid-column: 1; grid-row: 1;">Filter by:</a>
                             <a style="grid-column: 2; grid-row: 1;" onclick="Filter(event)" class="work-sans-regular">{{ rawDataDisplay_filter }}</a>
+                            {% if rawDataDisplay_filter_isRan %}
+                                <input style="grid-column: 3; grid-row: 1;" class="work-sans-regular">
+                            {% endif %}
+                            {% if rawDataDisplay_filter_isType %}
+                                <a style="grid-column: 3; grid-row: 1;" class="work-sans-regular"></a>
+                            {% endif %}
                         </div>
                         <div class="sortText work-sans-regular" style="display: grid;">
                             <a style="grid-column: 1; grid-row: 1;">Sort by:</a>
@@ -471,7 +477,7 @@
   }
 
   async function postSortContext(n) {
-    const payload = { number: n }; //context containing the number
+    const payload = { number: n, }; //context containing the number
 
     const res = await fetch(SORT_endpoint, {
       method: "POST",
