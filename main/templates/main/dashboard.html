@@ -73,10 +73,16 @@
                             <a style="grid-column: 1; grid-row: 1;">Filter by:</a>
                             <a style="grid-column: 2; grid-row: 1;" onclick="Filter(event)" class="work-sans-regular">{{ rawDataDisplay_filter }}</a>
                             {% if rawDataDisplay_filter_isRan %}
-                                <input style="grid-column: 3; grid-row: 1;" class="work-sans-regular">
+                                <form  method="POST" action="{% url 'setRan' %}">
+                                    {% csrf_token %}
+                                    <input style="grid-column: 3; grid-row: 1;" class="work-sans-regular">
+                                </form>
                             {% endif %}
                             {% if rawDataDisplay_filter_isType %}
-                                <a style="grid-column: 3; grid-row: 1;" class="work-sans-regular"></a>
+                                <form  method="POST" action="{% url 'setFilter' %}">
+                                    {% csrf_token %}
+                                    <input style="grid-column: 3; grid-row: 1;" class="work-sans-regular">
+                                </form>
                             {% endif %}
                         </div>
                         <div class="sortText work-sans-regular" style="display: grid;">

@@ -72,6 +72,20 @@ def login(request):
     
     return render(request, "main/index.html")
 
+def setRan(request):
+    if request.method =="POST":
+        data = json.loads(request.body.decode("utf-8"))
+        Misc.objects.filter(text_id=1).update(ran_Start=str(data.get("rdd_StartRan")))
+        Misc.objects.filter(text_id=1).update(ran_End=str(data.get("rdd_EndRan")))
+        return redirect("dashboard")
+
+def setFilter(request):
+    if request.method =="POST":
+        data = json.loads(request.body.decode("utf-8"))
+        Misc.objects.filter(text_id=1).update(filter_type=str(data.get("rdd_FilterType")))
+        return redirect("dashboard")
+
+
 def logout(request): #Need to implement cookie to store logged in state, & block access to dash if not present
     if request.method =="POST":
         return redirect("")
@@ -124,6 +138,9 @@ def rdd_filter(list, f_type, filter='None', ranStart=0, ranEnd=3):
 def rdd_sort(list, sort_type):
     pass
 
+def SetRan(request):
+    pass
+
 @never_cache #auto injects headers that tell the browser nothing is stored cache
 def dashboard(request):
     if request.method =="GET":
@@ -160,14 +177,14 @@ def dashboard(request):
 
         match filter_n:
             case 0: 
-                filter_type = 'None'
-                filtered_list = rdd_filter(AllData, filter_type)
+                sel_filter_type = 'None'
+                filtered_list = rdd_filter(AllData, sel_filter_type)
             case 1:
-                filter_type = 'Range'
-                filtered_list = rdd_filter(AllData, filter_type, rdd_StartRan, rdd_EndRan)
+                sel_filter_type = 'Range'
+                filtered_list = rdd_filter(AllData, sel_filter_type, rdd_StartRan, rdd_EndRan)
             case 2:
-                filter_type = 'Type'
-                filtered_list = rdd_filter(AllData, filter_type, rdd_type)
+                sel_filter_type = 'Type'
+                filtered_list = rdd_filter(AllData, sel_filter_type, rdd_type)
         match sort_n:
             case 0:
                 sort_type = 'Latest'
@@ -207,7 +224,7 @@ def dashboard(request):
         waterUsage_graph_api_string = makeGraph("waterUsage_graph", "Water Usage", "Time", "Water Used (L)", times, waterValues)
         gasUsage_graph_api_string = makeGraph("gasUsage_graph", "Gas Usage", "Time", "Gas Used (L)", times, gasValues)
         #I then render the graph by passing it through to the frontend under the variable electricityload_graph_api, allowing me to directly render the code onto the page!
-        if filter_type == 'Range':
+        if sel_filter_type == "Range":
             response = render(request, "main/dashboard.html", {
             "battVsSolar_graph_api": mark_safe(battVsSolar_graph_api_string),
             "electricityload_graph_api": mark_safe(electricityload_graph_api_string),
@@ -215,14 +232,14 @@ def dashboard(request):
             "gasUsage_graph_api": mark_safe(gasUsage_graph_api_string),
             "graphHeight": graphHeight,
             "graphWidth": graphWidth,
-            "rawDataDisplay_filter": filter_type,
+            "rawDataDisplay_filter": sel_filter_type,
             "rawDataDisplay_sort": sort_type,
             "rawDataDisplay_filter_n": filter_n,
             "rawDataDisplay_sort_n": sort_n,
             "rawDataDisplay_value_list": filtered_list,
             "rawDataDisplay_filter_isRan":"True"
             }) #mark_safe used to treat the string as trusted HTML (stops auto-escaping by Django)
-        elif filter_type == 'Type':
+        elif sel_filter_type == 'Type':
             response = render(request, "main/dashboard.html", {
             "battVsSolar_graph_api": mark_safe(battVsSolar_graph_api_string),
             "electricityload_graph_api": mark_safe(electricityload_graph_api_string),
@@ -230,7 +247,7 @@ def dashboard(request):
             "gasUsage_graph_api": mark_safe(gasUsage_graph_api_string),
             "graphHeight": graphHeight,
             "graphWidth": graphWidth,
-            "rawDataDisplay_filter": filter_type,
+            "rawDataDisplay_filter": sel_filter_type,
             "rawDataDisplay_sort": sort_type,
             "rawDataDisplay_filter_n": filter_n,
             "rawDataDisplay_sort_n": sort_n,
@@ -245,7 +262,7 @@ def dashboard(request):
             "gasUsage_graph_api": mark_safe(gasUsage_graph_api_string),
             "graphHeight": graphHeight,
             "graphWidth": graphWidth,
-            "rawDataDisplay_filter": filter_type,
+            "rawDataDisplay_filter": sel_filter_type,
             "rawDataDisplay_sort": sort_type,
             "rawDataDisplay_filter_n": filter_n,
             "rawDataDisplay_sort_n": sort_n,
