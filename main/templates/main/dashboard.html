@@ -11,6 +11,9 @@
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Work+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+        <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+        <meta http-equiv="Pragma" content="no-cache">
+        <meta http-equiv="Expires" content="0">
     </head>
 
     <body class="bg-img" src="{% static 'main/background.jpg' %}">
@@ -445,15 +448,15 @@
 <!-- Sort/Filter button handlers-->
 <script>
 (() => {
-  const FILTER_STOP_AT = 10; //Stops incrementing here, loops back over
+  const FILTER_STOP_AT = 3; //Stops incrementing here, loops back over
   const FILTER_STEP = 1; //how many steps to skip when looping
-  let FILTER_counter = 0; //Start value (or pull from current UI state)
-  const FILTER_endpoint = "/dashboard"; //API endpoint
+  let FILTER_counter = {{ rawDataDisplay_filter_n }}; //Start value (pull database)
+  const FILTER_endpoint = "/filter"; //API endpoint
 
-  const SORT_STOP_AT = 10; //Stops incrementing here, loops back over
+  const SORT_STOP_AT = 3; //Stops incrementing here, loops back over
   const SORT_STEP = 1; //how many steps to skip when looping
-  let SORT_counter = 0; //Start value (or pull from current UI state)
-  const SORT_endpoint = "/dashboard"; //API endpoint
+  let SORT_counter = {{ rawDataDisplay_sort_n }}; //Start value (pull database)
+  const SORT_endpoint = "/sort"; //API endpoint
 
   function nextSortCounter() {
     SORT_counter = SORT_counter + SORT_STEP;
@@ -485,6 +488,7 @@
       const text = await res.text().catch(() => "");
       throw new Error(`POST failed: ${res.status} ${text}`);
     }
+    window.location.reload(true);
   }
   async function postFilterContext(n) {
     const payload = { number: n }; //context containing the number
@@ -504,6 +508,7 @@
       const text = await res.text().catch(() => "");
       throw new Error(`POST failed: ${res.status} ${text}`);
     }
+    window.location.reload(true);
   }
 
   //Django CSRF read from cookie
