@@ -12,5 +12,6 @@ urlpatterns = [
     path("sort", views.sort, name="sort"),
     path("setRanStart", views.setRanStart, name="setRanStart"),
     path("setRanEnd", views.setRanEnd, name="setRanEnd"),
-    path("setFilter", views.setFilter, name="setFilter")
+    path("setFilter", views.setFilter, name="setFilter"),
+    path("doRDDLogic", views.doRDDLogic, name="doRDDLogic")
 ]

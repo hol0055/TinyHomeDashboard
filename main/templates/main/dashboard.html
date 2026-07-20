@@ -71,7 +71,7 @@
                         <div class="dataText work-sans-regular">Raw Data Display</div>
                         <div class="filterText work-sans-regular" style="display: grid;">
                             <a style="grid-column: 1; grid-row: 1;">Filter by:</a>
-                            <a style="grid-column: 2; grid-row: 1;" onclick="Filter(event)" class="work-sans-regular">{{ rawDataDisplay_filter }}</a>
+                            <a id="filter_btn" style="grid-column: 2; grid-row: 1;" onclick="Filter(event)" class="work-sans-regular">{{ rawDataDisplay_filter }}</a>
                             {% if rawDataDisplay_filter_isRan %}
                             <input id="filter_entry_startran" oninput="postFilterRanStart()" class="work-sans-regular filter_entry">
                             <input id="filter_entry_endran" oninput="postFilterRanEnd()" class="work-sans-regular filter_entry" style="grid-column: 4;">
@@ -82,23 +82,30 @@
                         </div>
                         <div class="sortText work-sans-regular" style="display: grid;">
                             <a style="grid-column: 1; grid-row: 1;">Sort by:</a>
-                            <a style="grid-column: 2; grid-row: 1;" onclick="Sort(event)" class="work-sans-regular">{{ rawDataDisplay_sort }}</a>
+                            <a id="sort_btn" style="grid-column: 2; grid-row: 1;" onclick="Sort(event)" class="work-sans-regular">{{ rawDataDisplay_sort }}</a>
                         </div>
                     </div>
-                    <div class="dataWrapper">
-                        <div class="fieldType">
-                            <p class="work-sans-regular">Type</p>
-                        </div>
-                        <div class="fieldDateTime">
-                            <p class="work-sans-regular">Date & Time</p>
-                        </div>
-                        <div class="fieldValue">
-                            <p class="work-sans-regular">Value</p>
-                        </div>
+                    <div class="table-wrapper">
+                        <table class="rawDataDisplay-table">
+                            <thead>
+                                <tr>
+                                    <th class="work-sans-regular">Type</th>
+                                    <th class="work-sans-regular">Date & Time</th>
+                                    <th class="work-sans-regular">Value</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!--{% for entry in rawDataDisplay_value_list %}
+                                <tr>
+                                    <td class="work-sans-regular">{{ entry.type }}</td>
+                                    <td class="work-sans-regular">{{ entry.date_time }}</td>
+                                    <td class="work-sans-regular">{{ entry.value }}</td>
+                                </tr>
+                                {% endfor %}-->
+
+                            </tbody>
+                        </table>
                     </div>
-                    <script>
-                        {{ rawDataDisplay_api }}
-                    </script>
                 </div>
                 <div class="graph-area-wrapper">
                     <div class="elec-graph-wrapper">
@@ -439,15 +446,37 @@
     </body>
 </html>
 
-<!-- Sort/Filter handlers-->
+<!-- Sort/Filter handlers, RDD handler -->
 <script>
 (() => {
+  //Function to re-pull the data for the RDD without requiring a page refresh
+  async function refreshTable() {
+    const res = await fetch("/doRDDLogic"); //API endpoint
+    const json = await res.json();
+    const tbody = document.querySelector(".rawDataDisplay-table tbody"); //Get first element that matches the selectors
+    tbody.innerHTML = ""; //Clear old rows
+
+    for (const entry of json.data) {
+        const tr = document.createElement("tr"); //Make a row within the table
+        tr.innerHTML = `
+            <td class="work-sans-regular">${entry.type}</td>
+            <td class="work-sans-regular">${entry.date_time}</td>
+            <td class="work-sans-regular">${entry.value}</td>
+        `;
+        tbody.appendChild(tr); //Add row to table
+    }
+
+    document.getElementById('filter_btn').textContent = json.filter_type;
+    document.getElementById('sort_btn').value = json.sort_type;
+  }
+
+
   const FILTER_STOP_AT = 2; //Stops incrementing here, loops back over
   const FILTER_STEP = 1; //how many steps to skip when looping
   let FILTER_counter = {{ rawDataDisplay_filter_n }}; //Start value (pull database)
   const FILTER_endpoint = "/filter"; //API endpoint
 
-  const SORT_STOP_AT = 3; //Stops incrementing here, loops back over
+  const SORT_STOP_AT = 4; //Stops incrementing here, loops back over
   const SORT_STEP = 1; //how many steps to skip when looping
   let SORT_counter = {{ rawDataDisplay_sort_n }}; //Start value (pull database)
   const SORT_endpoint = "/sort"; //API endpoint
@@ -482,8 +511,9 @@
       const text = await res.text().catch(() => "");
       throw new Error(`POST failed: ${res.status} ${text}`);
     }
-    window.location.reload(true);
+    refreshTable()
   }
+
   async function postFilterContext(n) {
     const payload = { number: n }; //context containing the number
 
@@ -502,7 +532,7 @@
       const text = await res.text().catch(() => "");
       throw new Error(`POST failed: ${res.status} ${text}`);
     }
-    window.location.reload(true);
+    refreshTable()
   }
 
   //Django CSRF read from cookie
@@ -520,11 +550,31 @@
 
   window.Sort = async function Sort() { //Actual function thats called by the button
     const n = nextSortCounter();
-    return postSortContext(n);
+    await fetch("/sort", { 
+        method: "POST", 
+        headers: {
+            "Content-Type": "application/json",
+            "X-Requested-With": "XMLHttpRequest",
+            "X-CSRFToken": getCSRFToken()
+        }, 
+        body: JSON.stringify({ number: n }),
+        credentials: "same-origin"
+    })
+    await refreshTable();
   };
   window.Filter = async function Filter() { //Actual function thats called by the button
     const n = nextFilterCounter();
-    return postFilterContext(n);
+    await fetch("/filter", { 
+        method: "POST", 
+        headers: {
+            "Content-Type": "application/json",
+            "X-Requested-With": "XMLHttpRequest",
+            "X-CSRFToken": getCSRFToken()
+        }, 
+        body: JSON.stringify({ number: n }),
+        credentials: "same-origin"
+    })
+    await refreshTable();
   };
 
   let filterDebounceTimer = null; //Timer to prevent calling twice

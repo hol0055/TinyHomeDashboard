@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.http import JsonResponse
 from django.http import HttpResponseRedirect
 from django.urls import reverse #used to dynamically generate a URL path based on a URL pattern's assigned name
 from django.views.decorators.cache import never_cache #Decorator that adds headers to a response so that it will never be cached
@@ -10,6 +10,7 @@ from .models import Misc
 
 import re
 import json
+import datetime
 
 #Return index.html on site load.
 def index(request):
@@ -161,19 +162,26 @@ def rdd_filter(list, f_type, filter='None', ranStart=0, ranEnd=100):
             f.write(str(filtered_list))
         return filtered_list
 
+
+def dictKey(key, element):
+    return element[key]
+
+def dictKeyDT(key, element):
+    return datetime.datetime.strptime(element[key], "%H:%M")
+
 #Perform sorting on the selected list, with the specified type of sorting (Latest, Oldest, Value Ascending, Value Descending or Alphabetical)
 def rdd_sort(list, sort_type):
     match sort_type:
         case "Latest":
-            pass
+            return sorted(list, key=lambda x: dictKeyDT("date_time", x))
         case "Oldest":
-            pass
+            return sorted(list, key=lambda x: dictKeyDT("date_time", x), reverse=True)
         case "Value Ascending":
-            pass
+            return sorted(list, key=lambda x: dictKey("value", x))
         case "Value Descending":
-            pass
+            return sorted(list, key=lambda x: dictKey("value", x), reverse=True)
         case "Alphabetical":
-            pass
+            return sorted(list, key=lambda x: dictKey("type", x))
 
 #Take all data from the database relevant to the dashboard, interpret it, and return context for a HTTP response.
 #The data provided within the context is fed into the dashboard's html, css and javascript code dynamically.
@@ -228,10 +236,10 @@ def doDashboardLogic():
         case 2:
             sort_type = 'Value Ascending'
             sorted_list = rdd_sort(filtered_list, sort_type)
-        case 2:
+        case 3:
             sort_type = 'Value Descending'
             sorted_list = rdd_sort(filtered_list, sort_type)
-        case 3:
+        case 4:
             sort_type = 'Alphabetical'
             sorted_list = rdd_sort(filtered_list, sort_type)
     
@@ -275,7 +283,7 @@ def doDashboardLogic():
         "rawDataDisplay_sort": sort_type,
         "rawDataDisplay_filter_n": filter_n,
         "rawDataDisplay_sort_n": sort_n,
-        "rawDataDisplay_value_list": filtered_list,
+        "rawDataDisplay_value_list": sorted_list,
         "rawDataDisplay_filter_isRan":"True"
         } 
     elif str(sel_filter_type) == str("Type"): #Return this context if the RawDataDisplayh is being filtered by type
@@ -290,7 +298,7 @@ def doDashboardLogic():
         "rawDataDisplay_sort": sort_type,
         "rawDataDisplay_filter_n": filter_n,
         "rawDataDisplay_sort_n": sort_n,
-        "rawDataDisplay_value_list": filtered_list,
+        "rawDataDisplay_value_list": sorted_list,
         "rawDataDisplay_filter_isType":"True"
         }
     else: #Return this context if the RawDataDisplayh ISN'T being filtered
@@ -305,7 +313,7 @@ def doDashboardLogic():
         "rawDataDisplay_sort": sort_type,
         "rawDataDisplay_filter_n": filter_n,
         "rawDataDisplay_sort_n": sort_n,
-        "rawDataDisplay_value_list": filtered_list
+        "rawDataDisplay_value_list": sorted_list
         }
     
     return context
@@ -317,6 +325,56 @@ def doDashboardLogic():
     This allows me to display the corresponding fields that the user must enter
     their filtering conditions into.
     '''
+
+def doRDDLogic(request):
+    misc = Misc.objects.get(text_id=1)
+    Sensor_all = SensorDetails.objects.order_by("-date_time") #Get all entries in the SensorDetails table
+    AllData = []
+    
+    for r in Sensor_all:
+        dt = f"{str(r.date_time.strftime('%H:%M'))}"
+        AllData.extend([
+            {"type": "battery_charge", "date_time": dt, "value": r.battery_charge},
+            {"type": "battery_voltage", "date_time": dt, "value": r.battery_voltage},
+            {"type": "battery_output", "date_time": dt, "value": r.battery_output},
+            {"type": "battery_temperature", "date_time": dt, "value": r.battery_temperature},
+            {"type": "solar_output", "date_time": dt, "value": r.solar_output},
+            {"type": "electricityload_value", "date_time": dt, "value": r.electricityload_value},
+            {"type": "water_usage", "date_time": dt, "value": r.water_usage},
+            {"type": "gas_usage", "date_time": dt, "value": r.gas_usage},
+        ])
+
+    sel_filter_type = "None"
+    sort_type = "Latest"
+    match misc.filter_value:
+        case 0: 
+            sel_filter_type = str("None")
+            filtered_list = rdd_filter(AllData, "None")
+        case 1:
+            sel_filter_type = str("Range")
+            filtered_list = rdd_filter(AllData, "Range", misc.filter_type, misc.ran_Start, misc.ran_End)
+        case 2:
+            sel_filter_type = str("Type")
+            filtered_list = rdd_filter(AllData, "Type", misc.filter_type)
+    match misc.sort_value:
+        case 0:
+            sort_type = 'Latest'
+            sorted_list = rdd_sort(filtered_list, 'Latest')
+        case 1:
+            sort_type = 'Oldest'
+            sorted_list = rdd_sort(filtered_list, 'Oldest')
+        case 2:
+            sort_type = 'Value Ascending'
+            sorted_list = rdd_sort(filtered_list, 'Value Ascending')
+        case 3:
+            sort_type = 'Value Descending'
+            sorted_list = rdd_sort(filtered_list, 'Value Descending')
+        case 4:
+            sort_type = 'Alphabetical'
+            sorted_list = rdd_sort(filtered_list, 'Alphabetical')
+    #"count": len(filtered_list)
+    return JsonResponse({"data": sorted_list, "filter_type": sel_filter_type, "sort_type": sort_type})
+
 
 #Return dashboard.html on page visit (with context from doDashboardLogic()).
 @never_cache #auto injects headers that tell the browser nothing is stored cache
