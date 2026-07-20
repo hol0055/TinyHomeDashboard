@@ -116,18 +116,19 @@ def sort(request):
         return redirect("dashboard")
 
 def rdd_filter(list, f_type, filter='None', ranStart=0, ranEnd=3):
-    if f_type == 'None':
+    if f_type == str("None"):
         with open("output.txt", "a", encoding="utf-8") as f:
             f.write(str(list))
-        return list
-    if f_type == 'Range':
+        filtered_list = list
+        return filtered_list
+    if f_type == str("Range"):
         for i in list:
             filtered_list = [x for x in list if (float(ranStart) < float(x["value"]) < float(ranEnd))]
             #for i in filtered_list:
         with open("output.txt", "a", encoding="utf-8") as f:
             f.write(str(filtered_list))
         return filtered_list
-    if f_type == 'Type':
+    if f_type == str("Type"):
         for i in list:
             filtered_list = [x for x in list if x["type"] == f"{filter}"]
             #for i in filtered_list:
@@ -136,7 +137,11 @@ def rdd_filter(list, f_type, filter='None', ranStart=0, ranEnd=3):
         return filtered_list
 
 def rdd_sort(list, sort_type):
-    pass
+    match sort_type:
+        case "Latest":
+            pass
+        case "Latest":
+            pass
 
 def SetRan(request):
     pass
@@ -174,16 +179,17 @@ def dashboard(request):
         rdd_type = Misc.objects.get(text_id=1).filter_type
         rdd_StartRan = Misc.objects.get(text_id=1).ran_Start
         rdd_EndRan = Misc.objects.get(text_id=1).ran_End
+        sel_filter_type = str("None")
 
         match filter_n:
             case 0: 
-                sel_filter_type = 'None'
+                sel_filter_type = str("None")
                 filtered_list = rdd_filter(AllData, sel_filter_type)
             case 1:
-                sel_filter_type = 'Range'
+                sel_filter_type = str("Range")
                 filtered_list = rdd_filter(AllData, sel_filter_type, rdd_StartRan, rdd_EndRan)
             case 2:
-                sel_filter_type = 'Type'
+                sel_filter_type = str("Type")
                 filtered_list = rdd_filter(AllData, sel_filter_type, rdd_type)
         match sort_n:
             case 0:
@@ -224,7 +230,7 @@ def dashboard(request):
         waterUsage_graph_api_string = makeGraph("waterUsage_graph", "Water Usage", "Time", "Water Used (L)", times, waterValues)
         gasUsage_graph_api_string = makeGraph("gasUsage_graph", "Gas Usage", "Time", "Gas Used (L)", times, gasValues)
         #I then render the graph by passing it through to the frontend under the variable electricityload_graph_api, allowing me to directly render the code onto the page!
-        if sel_filter_type == "Range":
+        if str(sel_filter_type) == str("Range"):
             response = render(request, "main/dashboard.html", {
             "battVsSolar_graph_api": mark_safe(battVsSolar_graph_api_string),
             "electricityload_graph_api": mark_safe(electricityload_graph_api_string),
@@ -239,7 +245,7 @@ def dashboard(request):
             "rawDataDisplay_value_list": filtered_list,
             "rawDataDisplay_filter_isRan":"True"
             }) #mark_safe used to treat the string as trusted HTML (stops auto-escaping by Django)
-        elif sel_filter_type == 'Type':
+        elif str(sel_filter_type) == str("Type"):
             response = render(request, "main/dashboard.html", {
             "battVsSolar_graph_api": mark_safe(battVsSolar_graph_api_string),
             "electricityload_graph_api": mark_safe(electricityload_graph_api_string),
