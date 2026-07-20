@@ -73,16 +73,11 @@
                             <a style="grid-column: 1; grid-row: 1;">Filter by:</a>
                             <a style="grid-column: 2; grid-row: 1;" onclick="Filter(event)" class="work-sans-regular">{{ rawDataDisplay_filter }}</a>
                             {% if rawDataDisplay_filter_isRan %}
-                                <form  method="POST" action="{% url 'setRan' %}">
-                                    {% csrf_token %}
-                                    <input style="grid-column: 3; grid-row: 1;" class="work-sans-regular">
-                                </form>
+                            <input id="filter_entry_startran" oninput="postFilterRanStart()" class="work-sans-regular filter_entry">
+                            <input id="filter_entry_endran" oninput="postFilterRanEnd()" class="work-sans-regular filter_entry" style="grid-column: 4;">
                             {% endif %}
                             {% if rawDataDisplay_filter_isType %}
-                                <form  method="POST" action="{% url 'setFilter' %}">
-                                    {% csrf_token %}
-                                    <input style="grid-column: 3; grid-row: 1;" class="work-sans-regular">
-                                </form>
+                            <input id="filter_entry_type" oninput="postFilter()" class="work-sans-regular filter_entry">
                             {% endif %}
                         </div>
                         <div class="sortText work-sans-regular" style="display: grid;">
@@ -266,9 +261,9 @@
 
             
             *{
-                margin:0;
-                padding:0;
-                box-sizing:border-box;
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
             }
 
 
@@ -277,101 +272,99 @@
                 background-repeat: no-repeat;
                 background-position: center;
                 position: absolute;
+                overflow-y: inherit!important;
             }
 
             /* ------MAIN DASHBOARD------ */
 
             #dashboard{
-                display:grid;
-                grid-template-columns:4fr 1fr;
-                gap:20px;
-                align-items:start;
-            max-width: 1200px;
-            margin-left: auto;
-            margin-right: auto;
+                display: grid;
+                grid-template-columns: 4fr 1fr;
+                gap: 20px;
+                align-items: start;
+                max-width: 1200px;
+                margin-left: auto;
+                margin-right: auto;
             }
 
             /* ------LEFT COLUMN------ */
 
             #col1{
-                display:flex;
-                flex-direction:column;
-                gap:25px;
+                display: flex;
+                flex-direction: column;
+                gap: 25px;
             }
 
             /* Each row contains 3 graphs */
 
-            #graph-row{
-                display:grid;
-                grid-template-columns:repeat(3,1fr);
-                gap:20px;
+            .graph-row{
+                display: grid;
+                grid-template-columns: repeat(3,1fr);
+                gap: 30px;
             }
 
             /* Graph styling */
 
-            .graph-area-wrapper{
-                width:100%;
+            .graph-area-wrapper {
+                width: 100%;
             }
 
-            .elec-graph-wrapper{
-                background:#ffffff;
-                border-radius:30px;
-                padding:20px;
-                width:100%;
-                aspect-ratio:1.35;
-                display:flex;
-                justify-content:center;
-                align-items:center;
-                box-shadow:0 5px 18px rgba(0,0,0,.15);
+            .elec-graph-wrapper {
+                background: #ffffff;
+                border-radius: 30px;
+                padding: 20px;
+                width: 100%;
+                aspect-ratio: 1.35;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                box-shadow: 0 5px 18px rgba(0,0,0,.15);
 
+            }
+
+            .filter_entry {
+                grid-column: 3; 
+                grid-row: 1;
+                max-width: 2vw;
             }
 
             /* Graph canvas */
 
-            /* .graph{
-                width:100% !important;
-                height:100% !important;
-
-            } */
-            .graph{ /*Theres a load of errors for me here, I can't do anything about them. Django var passing, that whole ordeal...*/
-                    width: {{ graphWidth }} !important;
-                    height: {{ graphHeight }} !important;
-                    max-width: {{ graphWidth }} !important;
-                    max-height: {{ graphHeight }} !important;
-                    display: block;
-                }
+            .graph { /*Theres a load of errors for me here, I can't do anything about them. Django var passing, that whole ordeal...*/
+                width: {{ graphWidth }} !important;
+                height: {{ graphHeight }} !important;
+                max-width: {{ graphWidth }} !important;
+                max-height: {{ graphHeight }} !important;
+                display: block;
+            }
 
 
             /* -----RIGHT COLUMN----- */
 
-            #col2{
-                display:flex;
-                flex-direction:column;
-                gap:30px;
+            #col2 {
+                display: flex;
+                flex-direction: column;
+                gap: 30px;
                 margin-left: 2vw;
             }
 
             /* Wrapper styling */
 
-            .stack-area-wrapper{
-                width:100%;
+            .stack-area-wrapper {
+                width: 100%;
             }
 
             /* Insights styling */
 
-            .stack-insights-wrapper{
-                background:#ffffff;
-                border-radius:35px;
-                /*min-height:260px;
-                width: 100%;
-                max-width: 360px;
-                aspect-ratio: 1;*/
-                padding:25px;
-                display:flex;
-                justify-content:center;
-                align-items:center;
-                text-align:center;
-                box-shadow:0 5px 18px rgba(0,0,0,.15);
+            .stack-insights-wrapper {
+                background: #ffffff;
+                border-radius: 35px;
+                padding: 25px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                text-align: center;
+                box-shadow: 0 5px 18px rgba(0,0,0,.15);
                 width: 15vw;
                 min-height: 50vh;
                 margin-top: 2vh;
@@ -380,18 +373,18 @@
 
             /* Statistics styling */
 
-            .stack-stats-wrapper{
-                background:#ffffff;
-                border-radius:50%;
-                aspect-ratio:1;
-                width:100%;
-                max-width:360px;
-                margin:auto;
-                display:flex;
-                justify-content:center;
-                align-items:center;
-                text-align:center;
-                box-shadow:0 5px 18px rgba(0,0,0,.15);
+            .stack-stats-wrapper {
+                background: #ffffff;
+                border-radius: 50%;
+                aspect-ratio: 1;
+                width: 100%;
+                max-width: 360px;
+                margin: auto;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                text-align: center;
+                box-shadow: 0 5px 18px rgba(0,0,0,.15);
             }
 
 
@@ -401,48 +394,37 @@
 
             /* Large Screens */
 
-            @media (max-width:1200px){
+            @media (max-width:1200px) {
 
-                #dashboard{
-                    grid-template-columns:1fr;
+                #dashboard {
+                    grid-template-columns: 1fr;
                 }
 
-                #col2{
+                #col2 {
 
-                    flex-direction:row;
-                    justify-content:center;
-                    align-items:stretch;
+                    flex-direction: row;
+                    justify-content: center;
+                    align-items: stretch;
                 }
 
-                .stack-area-wrapper{
-                    flex:1;
+                .stack-area-wrapper {
+                    flex: 1;
                 }
 
             }
 
             /* Tablets/Medium screens */
 
-            @media (max-width:900px){
+            @media (max-width:900px) {
 
-                #graph-row{
-                grid-template-columns:repeat(2,1fr);
+                #graph-row {
+                    grid-template-columns: repeat(2,1fr);
                 }
 
-                #col2{
-                    flex-direction:column;
+                #col2 {
+                    flex-direction: column;
                 }
 
-            }
-
-
-            .graph-row{
-                display:grid;
-                grid-template-columns:repeat(3,1fr);
-                gap:30px;
-            }
-
-            .bg-img {
-                overflow-y:  inherit!important;
             }
         </style>
         <script>
@@ -457,7 +439,7 @@
     </body>
 </html>
 
-<!-- Sort/Filter button handlers-->
+<!-- Sort/Filter handlers-->
 <script>
 (() => {
   const FILTER_STOP_AT = 2; //Stops incrementing here, loops back over
@@ -544,6 +526,87 @@
     const n = nextFilterCounter();
     return postFilterContext(n);
   };
+
+  let filterDebounceTimer = null; //Timer to prevent calling twice
+  window.postFilter = async function postFilter() {
+    //Had an issue where the payload was being sent twice. This was due to how I a)Check that a change has been made to the input field
+    //and b)How I pull the value when the function is called. To fix this, I have added a 'debounce' timer.
+    if (filterDebounceTimer) clearTimeout(filterDebounceTimer);
+    filterDebounceTimer = setTimeout(async () => {
+        const POST_endpoint = "/setFilter"
+        const GET_endpoint = "/dashboard"
+        const input = document.getElementById('filter_entry_type').value;
+        const payload = { rdd_FilterType: input }; //context containing the number
+
+        const res = await fetch(POST_endpoint, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-Requested-With": "XMLHttpRequest",
+            "X-CSRFToken": getCSRFToken()
+        },
+        body: JSON.stringify(payload),
+        credentials: "same-origin"
+        });
+
+        if (!res.ok) { //Catch errors
+        const text = await res.text().catch(() => "");
+        throw new Error(`POST failed: ${res.status} ${text}`);
+        }
+    }, 300);
+  }
+
+  let startRanDebounceTimer = null;
+  window.postFilterRanStart = async function postFilterStartRan() {
+    if (startRanDebounceTimer) clearTimeout(startRanDebounceTimer);
+    startRanDebounceTimer = setTimeout(async () => {
+        const POST_endpoint = "/setRanStart"
+        const ranStartInput = document.getElementById('filter_entry_startran').value;
+        const payload = { rdd_StartRan: ranStartInput }; //context containing the number
+
+        const res = await fetch(POST_endpoint, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-Requested-With": "XMLHttpRequest",
+            "X-CSRFToken": getCSRFToken()
+        },
+        body: JSON.stringify(payload),
+        credentials: "same-origin"
+        });
+
+        if (!res.ok) { //Catch errors
+        const text = await res.text().catch(() => "");
+        throw new Error(`POST failed: ${res.status} ${text}`);
+        }
+    }, 300);
+  }
+
+  let ranEndDebounceTimer = null;
+  window.postFilterRanEnd = async function postFilterRanEnd() {
+    if (ranEndDebounceTimer) clearTimeout(ranEndDebounceTimer);
+    ranEndDebounceTimer = setTimeout(async () => {
+        const POST_endpoint = "/setRanEnd"
+        const ranEndInput = document.getElementById('filter_entry_endran').value;
+        const payload = { rdd_EndRan: ranEndInput }; //context containing the number
+
+        const res = await fetch(POST_endpoint, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-Requested-With": "XMLHttpRequest",
+            "X-CSRFToken": getCSRFToken()
+        },
+        body: JSON.stringify(payload),
+        credentials: "same-origin"
+        });
+
+        if (!res.ok) { //Catch errors
+        const text = await res.text().catch(() => "");
+        throw new Error(`POST failed: ${res.status} ${text}`);
+        }
+    }, 300);
+  }
 
 })();
 </script>

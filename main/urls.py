@@ -10,6 +10,7 @@ urlpatterns = [
     path("logout", views.logout, name="logout"),
     path("filter", views.filter, name="filter"),
     path("sort", views.sort, name="sort"),
-    path("setRan", views.setRan, name="setRan"),
+    path("setRanStart", views.setRanStart, name="setRanStart"),
+    path("setRanEnd", views.setRanEnd, name="setRanEnd"),
     path("setFilter", views.setFilter, name="setFilter")
 ]
