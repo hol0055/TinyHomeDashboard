@@ -7,6 +7,7 @@ from .models import UserDetails
 from django.utils.html import mark_safe
 from .models import SensorDetails
 from .models import Misc
+from .models import WeatherPulled
 
 import re
 import json
@@ -91,6 +92,7 @@ def setRanStart(request):
         response['Pragma'] = 'no-cache'
         response['Expires'] = '0'
         return response
+        #doRDDLogic()
     
 #Take range's end value for RawDataDisplay's filter, update database with those values, call doDashboardLogic() and return dashboard.html
 def setRanEnd(request):
@@ -103,6 +105,7 @@ def setRanEnd(request):
         response['Pragma'] = 'no-cache'
         response['Expires'] = '0'
         return response
+        #doRDDLogic()
 
 #Take filtered value for RawDataDisplay's filter, update database with that string, call doDashboardLogic() and return dashboard.html
 def setFilter(request):
@@ -115,6 +118,7 @@ def setFilter(request):
         response['Pragma'] = 'no-cache'
         response['Expires'] = '0'
         return response
+        doRDDLogic()
 
 #Get user's RawDataDisplay chosen filter type (None, Value or Range) in number form
 @never_cache #auto injects headers that tell the browser nothing is stored cache
@@ -183,6 +187,48 @@ def rdd_sort(list, sort_type):
         case "Alphabetical":
             return sorted(list, key=lambda x: dictKey("type", x))
 
+class GraphHandler: #Class to handle graph generation and retention
+    def __init__(self):
+        self.__elecLoadValues = []
+        self.__waterValues = []
+        self.__gasValues = []
+        self.__batteryValues = []
+        self.__solarValues = []
+        self.__times = []
+
+    def update_array(self):
+        #Here we take the last 5 entries in the SensorDetails table within the database
+        Sensor_last5 = SensorDetails.objects.order_by("-date_time")[:5]
+
+        #Create empty lists for each column within the table
+        self.__elecLoadValues = []
+        self.__waterValues = []
+        self.__gasValues = []
+        self.__batteryValues = []
+        self.__solarValues = []
+        self.__times = []
+        #Append each entry's values into a list
+        for i in Sensor_last5:
+            self.__elecLoadValues.append(i.electricityload_value) #Add each entry's electricityload_value to the list
+            self.__waterValues.append(i.water_usage) #Add each entry's water_usage to the list
+            self.__gasValues.append(i.gas_usage) #Add each entry's gas_usage to the list
+            self.__batteryValues.append(i.battery_charge) #Add each entry's battery_charge to the list
+            self.__solarValues.append(i.solar_output) #Add each entry's solar_output to the list
+            self.__times.append(f"{str(i.date_time.strftime("%H:%M"))}") #Add the time of each entry to the list
+        
+    def get_graph(self, type): #Match for the graph type, return the makeGraph function or makeMixedGraph utilising private class variables
+        match type:
+            case "batt_vs_solar":
+                return makeMixedGraph("battVsSolar_graph", "Battery Charge VS Solar Output", "Time", "Output (W)", "Battery Output (W)", "Solar Output (W)", self.__times, self.__batteryValues, self.__solarValues)
+            case "electricity_load":
+                return makeGraph("electricityload_graph", "Electricity Load", "Time", "Load (W)", self.__times, self.__elecLoadValues)
+            case "water_usage":
+                return makeGraph("waterUsage_graph", "Water Usage", "Time", "Water Used (L)", self.__times, self.__waterValues)
+            case "gas_usage":
+                return makeGraph("gasUsage_graph", "Gas Usage", "Time", "Gas Used (L)", self.__times, self.__gasValues)
+
+
+
 #Take all data from the database relevant to the dashboard, interpret it, and return context for a HTTP response.
 #The data provided within the context is fed into the dashboard's html, css and javascript code dynamically.
 def doDashboardLogic():
@@ -243,88 +289,26 @@ def doDashboardLogic():
             sort_type = 'Alphabetical'
             sorted_list = rdd_sort(filtered_list, sort_type)
     
-    #Here we take the last 5 entries in the SensorDetails table within the database
-    Sensor_last5 = SensorDetails.objects.order_by("-date_time")[:5]
-
-    #Create empty lists for each column within the table
-    elecLoadValues = []
-    waterValues = []
-    gasValues = []
-    batteryValues = []
-    solarValues = []
-    times = []
-
-    #Append each entry's values into a list
-    for i in Sensor_last5:
-        elecLoadValues.append(i.electricityload_value) #Add each entry's electricityload_value to the list
-        waterValues.append(i.water_usage) #Add each entry's water_usage to the list
-        gasValues.append(i.gas_usage) #Add each entry's gas_usage to the list
-        batteryValues.append(i.battery_charge) #Add each entry's battery_charge to the list
-        solarValues.append(i.solar_output) #Add each entry's solar_output to the list
-        times.append(f"{str(i.date_time.strftime("%H:%M"))}") #Add the time of each entry to the list
-
-    #Essentially, this line calls the makeGraph function, defining the graph, its data set, labels, and other qualities
-    battVsSolar_graph_api_string = makeMixedGraph("battVsSolar_graph", "Battery Charge VS Solar Output", "Time", "Output (W)", "Battery Output (W)", "Solar Output (W)", times, batteryValues, solarValues)
-    electricityload_graph_api_string = makeGraph("electricityload_graph", "Electricity Load", "Time", "Load (W)", times, elecLoadValues)
-    waterUsage_graph_api_string = makeGraph("waterUsage_graph", "Water Usage", "Time", "Water Used (L)", times, waterValues)
-    gasUsage_graph_api_string = makeGraph("gasUsage_graph", "Gas Usage", "Time", "Gas Used (L)", times, gasValues)
+    graph_handler = GraphHandler()
+    graph_handler.update_array()
     
     #I then render the graphs by passing it through to the frontend under defined variables
     #mark_safe used to treat the string as trusted HTML (stops auto-escaping by Django)
-    if str(sel_filter_type) == str("Range"): #Return this context if the RawDataDisplayh is being filtered by range
-        context = {
-        "battVsSolar_graph_api": mark_safe(battVsSolar_graph_api_string),
-        "electricityload_graph_api": mark_safe(electricityload_graph_api_string),
-        "waterUsage_graph_api": mark_safe(waterUsage_graph_api_string),
-        "gasUsage_graph_api": mark_safe(gasUsage_graph_api_string),
-        "graphHeight": graphHeight,
-        "graphWidth": graphWidth,
-        "rawDataDisplay_filter": sel_filter_type,
-        "rawDataDisplay_sort": sort_type,
-        "rawDataDisplay_filter_n": filter_n,
-        "rawDataDisplay_sort_n": sort_n,
-        "rawDataDisplay_value_list": sorted_list,
-        "rawDataDisplay_filter_isRan":"True"
-        } 
-    elif str(sel_filter_type) == str("Type"): #Return this context if the RawDataDisplayh is being filtered by type
-        context = {
-        "battVsSolar_graph_api": mark_safe(battVsSolar_graph_api_string),
-        "electricityload_graph_api": mark_safe(electricityload_graph_api_string),
-        "waterUsage_graph_api": mark_safe(waterUsage_graph_api_string),
-        "gasUsage_graph_api": mark_safe(gasUsage_graph_api_string),
-        "graphHeight": graphHeight,
-        "graphWidth": graphWidth,
-        "rawDataDisplay_filter": sel_filter_type,
-        "rawDataDisplay_sort": sort_type,
-        "rawDataDisplay_filter_n": filter_n,
-        "rawDataDisplay_sort_n": sort_n,
-        "rawDataDisplay_value_list": sorted_list,
-        "rawDataDisplay_filter_isType":"True"
-        }
-    else: #Return this context if the RawDataDisplayh ISN'T being filtered
-        context = {
-        "battVsSolar_graph_api": mark_safe(battVsSolar_graph_api_string),
-        "electricityload_graph_api": mark_safe(electricityload_graph_api_string),
-        "waterUsage_graph_api": mark_safe(waterUsage_graph_api_string),
-        "gasUsage_graph_api": mark_safe(gasUsage_graph_api_string),
-        "graphHeight": graphHeight,
-        "graphWidth": graphWidth,
-        "rawDataDisplay_filter": sel_filter_type,
-        "rawDataDisplay_sort": sort_type,
-        "rawDataDisplay_filter_n": filter_n,
-        "rawDataDisplay_sort_n": sort_n,
-        "rawDataDisplay_value_list": sorted_list
-        }
+    context = {
+    "battVsSolar_graph_api": mark_safe(graph_handler.get_graph("batt_vs_solar")),
+    "electricityload_graph_api": mark_safe(graph_handler.get_graph("electricity_load")),
+    "waterUsage_graph_api": mark_safe(graph_handler.get_graph("water_usage")),
+    "gasUsage_graph_api": mark_safe(graph_handler.get_graph("gas_usage")),
+    "graphHeight": graphHeight,
+    "graphWidth": graphWidth,
+    "rawDataDisplay_filter": sel_filter_type,
+    "rawDataDisplay_sort": sort_type,
+    "rawDataDisplay_filter_n": filter_n,
+    "rawDataDisplay_sort_n": sort_n,
+    "rawDataDisplay_value_list": sorted_list
+    }
     
     return context
-
-    '''
-    The reason as to why I do this, is simply as I include a 
-    variable within the context that tells the HTML to render specific elements
-    depending on the type of filtering that has been selected.
-    This allows me to display the corresponding fields that the user must enter
-    their filtering conditions into.
-    '''
 
 def doRDDLogic(request):
     misc = Misc.objects.get(text_id=1)
@@ -375,6 +359,17 @@ def doRDDLogic(request):
     #"count": len(filtered_list)
     return JsonResponse({"data": sorted_list, "filter_type": sel_filter_type, "sort_type": sort_type})
 
+def doBreakdownLogic(request):
+    weekly_weather = WeatherPulled.objects.order_by("day")[:7] #Pull last 7 entries
+    data = []
+    for w in weekly_weather:
+        data.append({
+            "day": w.day,
+            "max_temp": w.max_temp,
+            "min_temp": w.min_temp,
+            "status": w.status
+        })
+    return JsonResponse({"data": data})
 
 #Return dashboard.html on page visit (with context from doDashboardLogic()).
 @never_cache #auto injects headers that tell the browser nothing is stored cache

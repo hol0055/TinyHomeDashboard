@@ -72,13 +72,9 @@
                         <div class="filterText work-sans-regular" style="display: grid;">
                             <a style="grid-column: 1; grid-row: 1;">Filter by:</a>
                             <a id="filter_btn" style="grid-column: 2; grid-row: 1;" onclick="Filter(event)" class="work-sans-regular">{{ rawDataDisplay_filter }}</a>
-                            {% if rawDataDisplay_filter_isRan %}
-                            <input id="filter_entry_startran" oninput="postFilterRanStart()" class="work-sans-regular filter_entry">
-                            <input id="filter_entry_endran" oninput="postFilterRanEnd()" class="work-sans-regular filter_entry" style="grid-column: 4;">
-                            {% endif %}
-                            {% if rawDataDisplay_filter_isType %}
-                            <input id="filter_entry_type" oninput="postFilter()" class="work-sans-regular filter_entry">
-                            {% endif %}
+                            <input id="filter_entry_startran" oninput="postFilterRanStart()" class="work-sans-regular filter_entry filter_ran_field" style="grid-column: 3; display: none;">
+                            <input id="filter_entry_endran" oninput="postFilterRanEnd()" class="work-sans-regular filter_entry filter_ran_field" style="grid-column: 4; display: none;">
+                            <input id="filter_entry_type" oninput="postFilter()" class="work-sans-regular filter_entry filter_type_field" style="grid-column: 3; display: none;">
                         </div>
                         <div class="sortText work-sans-regular" style="display: grid;">
                             <a style="grid-column: 1; grid-row: 1;">Sort by:</a>
@@ -146,9 +142,22 @@
             <!--ROW4 NEXT-->
             <div class="graph-row">
                 <div class="breakdown-area-wrapper">
-                    <script>
-                        {{ breakdown_api }}
-                    </script>
+                    <table class="weather-table work-sans-regular">
+                        <thead>
+                            <tr>
+                                <th>Mon</th>
+                                <th>Tues</th>
+                                <th>Wed</th>
+                                <th>Thurs</th>
+                                <th>Fri</th>
+                                <th>Sat</th>
+                                <th>Sun</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -254,17 +263,7 @@
                 display: block;
             }
 
-            .breakdown-area-wrapper {
-                background-color: white;
-                width: 50vw;
-                display: block;
-                flex-direction: column;
-                align-items: stretch;
-                height: {{ graphHeight }};
-                margin-left: 50px;
-                border-radius: 12px;
-            } */
-
+             */
 
             
             *{
@@ -345,6 +344,35 @@
                 display: block;
             }
 
+            .breakdown-area-wrapper {
+                background-color: white;
+                width: 50vw;
+                display: block;
+                flex-direction: column;
+                align-items: stretch;
+                margin-left: 50px;
+                border-radius: 12px;
+                height: {{ graphHeight }};
+            }
+
+            .weather-table {
+                border-collapse: collapse;
+                width: 100%;
+                font-size: 14pt;
+            }
+
+            .weather-table th, .weather-table td {
+                border: none;
+                padding: 4px 8px;
+                text-align: center;
+                background-color: transparent;
+            }
+
+            .weather-table thead th {
+                font-weight: bold;
+                text-decoration: underline;
+                font-size: 16pt;
+            }
 
             /* -----RIGHT COLUMN----- */
 
@@ -466,10 +494,62 @@
         tbody.appendChild(tr); //Add row to table
     }
 
+
+    const ranFields = document.querySelectorAll('.filter_ran_field');
+    const typeField = document.querySelector('.filter_type_field');
+    //Hide all buttons first
+    ranFields.forEach(el => el.style.display = 'None');
+    typeField.style.display = 'None';
+
+    //Show the correct field depending on filter type
+    if (json.filter_type == 'Range') {
+        ranFields.forEach(el => el.style.display = '');
+    }
+    else if (json.filter_type == 'Type') {
+        typeField.style.display = '';
+    }
+
     document.getElementById('filter_btn').textContent = json.filter_type;
-    document.getElementById('sort_btn').value = json.sort_type;
+    document.getElementById('sort_btn').textContent = json.sort_type;
+    refreshBreakdown();
   }
 
+  async function refreshBreakdown() {
+    const res = await fetch("/doBreakdownLogic"); //API endpoint
+    const json = await res.json();
+    const tbody = document.querySelector(".weather-table tbody"); //Get first element that matches the selectors
+    tbody.innerHTML = ""; //Clear old rows
+
+    if (!json.data || json.data.length == 0) return; //If payload is missing or empty, return nothing.
+
+    const max_row = document.createElement("tr"); //Max temp for each day
+    const min_row = document.createElement("tr"); //Min temp for each day
+    const status_row = document.createElement("tr"); //Status for each day
+
+    for (const entry of json.data) {
+        const max_row_el = document.createElement("td"); //Make a cell within the row
+        max_row_el.className = "work-sans-regular";
+        max_row_el.style = "font-size: 14pt;";
+        max_row_el.textContent = entry.max_temp != null ? entry.max_temp + "°" : "-";
+        max_row.appendChild(max_row_el);
+
+        const min_row_el = document.createElement("td"); //Make a row within the table
+        min_row_el.className = "work-sans-regular";
+        min_row_el.style = "font-size: 14pt;";
+        min_row_el.textContent = entry.min_temp != null ? entry.min_temp + "°" : "-";
+        min_row.appendChild(min_row_el);
+
+        const status_row_el = document.createElement("td"); //Make a row within the table
+        status_row_el.className = "work-sans-regular";
+        status_row_el.style = "font-size: 14pt;";
+        status_row_el.textContent = entry.status || "-";
+        status_row.appendChild(status_row_el);
+        
+        tbody.appendChild(max_row); //max_temp row
+        tbody.appendChild(min_row); //min_temp row
+        tbody.appendChild(status_row); //status row
+    }
+  }
 
   const FILTER_STOP_AT = 2; //Stops incrementing here, loops back over
   const FILTER_STEP = 1; //how many steps to skip when looping
@@ -603,6 +683,7 @@
         const text = await res.text().catch(() => "");
         throw new Error(`POST failed: ${res.status} ${text}`);
         }
+        await refreshTable();
     }, 300);
   }
 
@@ -629,6 +710,7 @@
         const text = await res.text().catch(() => "");
         throw new Error(`POST failed: ${res.status} ${text}`);
         }
+        await refreshTable();
     }, 300);
   }
 
@@ -655,6 +737,7 @@
         const text = await res.text().catch(() => "");
         throw new Error(`POST failed: ${res.status} ${text}`);
         }
+        await refreshTable();
     }, 300);
   }
 

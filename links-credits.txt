@@ -18,6 +18,18 @@ Refresh page on POST request
 https://realpython.com/django-redirects/
 https://codeworks.me/blog/how-to-reload-a-page-in-javascript/
 
+sorting/filtering algorithm stuff
+https://www.w3schools.com/python/python_lists_comprehension.asp
+
+Javascript reload page
+https://codeworks.me/blog/how-to-reload-a-page-in-javascript/
+
+Get value with javascript from html input field
+https://stackoverflow.com/a/61342918
+
+Classes python
+https://www.w3schools.com/python/python_encapsulation.asp
+
 database changes are applied like so:
 python manage.py makemigrations {app_name}
 python manage.py migrate
