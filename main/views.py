@@ -1,17 +1,53 @@
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
-from django.http import HttpResponseRedirect
-from django.urls import reverse #used to dynamically generate a URL path based on a URL pattern's assigned name
+#from django.http import HttpResponseRedirect
+#from django.urls import reverse #used to dynamically generate a URL path based on a URL pattern's assigned name
 from django.views.decorators.cache import never_cache #Decorator that adds headers to a response so that it will never be cached
 from .models import UserDetails
 from django.utils.html import mark_safe
 from .models import SensorDetails
 from .models import Misc
 from .models import WeatherPulled
+from django.conf import settings
 
 import re
 import json
 import datetime
+
+#--------------Auth cookie endpoint stuff
+def set_auth_cookie(response, user_email):
+    response.set_signed_cookie(
+        'auth_token',
+        user_email,
+        salt=settings.SIGNED_COOKIE_SALT,
+        max_age=86400 * 7, #7 Days converted into seconds
+        httponly=True, #Not accessible via javascript
+        samesite='Lax',
+        path='/'
+    )
+
+def delete_auth_cookie(response): #Delet cookie on response
+    response.delete_cookie('auth_token', path='/')
+
+#Get user email from the cookie
+def get_authenticated_user(request):
+    try:
+        email = request.get_signed_cookie(
+            'auth_token',
+            salt=settings.SIGNED_COOKIE_SALT
+        )
+        return UserDetails.objects.get(email=email)
+    except (KeyError, UserDetails.DoesNotExist): #Handle errors 'gracefully'
+        return None
+
+#Redirect to index if auth_token is not present or invalid
+def auth_required(view_func):
+    def wrapper(request, *args, **kwargs):
+        user = get_authenticated_user(request)
+        if user is None:
+            return redirect('/')
+        return view_func(request, *args, **kwargs)
+    return wrapper
 
 #Return index.html on site load.
 def index(request):
@@ -62,24 +98,26 @@ def login(request):
             user = UserDetails.objects.all() #get(email=emailGiven)
             user_details = user.get(email=emailGiven)
             if user_details.password == password:
-            #return render(request, "main/index.html", {"error":user_details})
-                return redirect("dashboard") #Redirect user to dashboard after validating their account details are correct
+                response = redirect("dashboard")
+                set_auth_cookie(response, user_details.email) #Set cookie.
+                return response #Redirect user to dashboard after validating their account details are correct
 
         except:
             raise RuntimeError("Email does not exist")
 
         #if db_email == email:
 
-
         return redirect("") #Reload page after failed login
     
     return render(request, "main/index.html")
 
-#Manage logout
-def logout(request): #Need to implement cookie to store logged in state, & block access to dash if not present
+#Manage logout, delete cookie
+def logout(request):
     if request.method =="POST":
-        return redirect("")
-    return render(request, "main/dashboard.html")
+        response = redirect("/")
+        delete_auth_cookie(response)
+        return response
+    return redirect("/")
 
 #Take range's start value for RawDataDisplay's filter, update database with those values, call doDashboardLogic() and return dashboard.html
 def setRanStart(request):
@@ -92,7 +130,6 @@ def setRanStart(request):
         response['Pragma'] = 'no-cache'
         response['Expires'] = '0'
         return response
-        #doRDDLogic()
     
 #Take range's end value for RawDataDisplay's filter, update database with those values, call doDashboardLogic() and return dashboard.html
 def setRanEnd(request):
@@ -105,7 +142,6 @@ def setRanEnd(request):
         response['Pragma'] = 'no-cache'
         response['Expires'] = '0'
         return response
-        #doRDDLogic()
 
 #Take filtered value for RawDataDisplay's filter, update database with that string, call doDashboardLogic() and return dashboard.html
 def setFilter(request):
@@ -118,7 +154,6 @@ def setFilter(request):
         response['Pragma'] = 'no-cache'
         response['Expires'] = '0'
         return response
-        doRDDLogic()
 
 #Get user's RawDataDisplay chosen filter type (None, Value or Range) in number form
 @never_cache #auto injects headers that tell the browser nothing is stored cache
@@ -129,11 +164,6 @@ def filter(request):
         #with open("output.txt", "w", encoding="utf-8") as f:
         #    f.write(str(data.get("number")))
         Misc.objects.filter(text_id=1).update(filter_value=str(data.get("number")))
-        #Misc.objects.filter(text_id=1).update(ran_End=str(data.get("rdd_EndRan")))
-        #Misc.objects.filter(text_id=1).update(ran_Start=str(data.get("rdd_StartRan")))
-        #response = HttpResponseRedirect(reverse("dashboard"))
-        #response['Refresh'] = '0'
-        #return response
         return redirect("dashboard")
 
 #Get user's RawDataDisplay chosen sort type (Latest, Oldest, Value Ascending, Value Descending or Alphabetical) in number form
@@ -142,7 +172,6 @@ def sort(request):
     if request.method =="POST":
         data = json.loads(request.body.decode("utf-8"))
         Misc.objects.filter(text_id=1).update(sort_value=str(data.get("number")))
-        #return render(request, "main/dashboard.html", {"rawDataDisplay_sort": str(data.get("number"))})
         return redirect("sort")
     if request.method =="GET":
         return redirect("dashboard")
@@ -356,14 +385,13 @@ def doRDDLogic(request):
         case 4:
             sort_type = 'Alphabetical'
             sorted_list = rdd_sort(filtered_list, 'Alphabetical')
-    #"count": len(filtered_list)
     return JsonResponse({"data": sorted_list, "filter_type": sel_filter_type, "sort_type": sort_type})
 
 def doBreakdownLogic(request):
     weekly_weather = WeatherPulled.objects.order_by("day")[:7] #Pull last 7 entries
     data = []
     for w in weekly_weather:
-        data.append({
+        data.append({ #Return the max and min temp for each day, along with the status
             "day": w.day,
             "max_temp": w.max_temp,
             "min_temp": w.min_temp,
@@ -382,10 +410,10 @@ def batteryStats(request):
     return JsonResponse(data)
 
 def insightLogic(request):
-    all_sensors = SensorDetails.objects.order_by("-date_time")
+    all_sensors = SensorDetails.objects.order_by("-date_time") #Sort db by date_time (latest).
     latest = all_sensors[0]
     n = len(all_sensors)
-    total_elec = 0.0
+    total_elec = 0.0 #Create empty vars
     total_water = 0.0
     total_gas = 0.0
     total_battery = 0.0
@@ -516,6 +544,7 @@ def insightLogic(request):
 
 #Return dashboard.html on page visit (with context from doDashboardLogic()).
 @never_cache #auto injects headers that tell the browser nothing is stored cache
+@auth_required #Cookie required, otherwise blocked.
 def dashboard(request):
     if request.method =="GET":
         response = render(request, "main/dashboard.html", doDashboardLogic())

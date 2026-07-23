@@ -14,6 +14,23 @@
         <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
         <meta http-equiv="Pragma" content="no-cache">
         <meta http-equiv="Expires" content="0">
+        <script>
+            //Client-side auth protection, handle cookie. If missing redirect to /
+            (function() {
+                function getCookie(name) {
+                    const cookies = document.cookie ? document.cookie.split(';') : [];
+                    for (const c of cookies) {
+                        if (cookie.startsWith(name + '=')) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+                if (!getCookie('auth_token')) {
+                    window.location.href = '/';
+                }
+            })();
+        </script>
     </head>
 
     <body class="bg-img" src="{% static 'main/background.jpg' %}">
