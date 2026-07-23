@@ -371,6 +371,149 @@ def doBreakdownLogic(request):
         })
     return JsonResponse({"data": data})
 
+def batteryStats(request):
+    latest = SensorDetails.objects.order_by("-date_time").first()
+    data = {
+        "battery_output": latest.battery_output,
+        "battery_voltage": latest.battery_voltage,
+        "battery_charge": latest.battery_charge,
+        "battery_temperature": latest.battery_temperature
+    }
+    return JsonResponse(data)
+
+def insightLogic(request):
+    all_sensors = SensorDetails.objects.order_by("-date_time")
+    latest = all_sensors[0]
+    n = len(all_sensors)
+    total_elec = 0.0
+    total_water = 0.0
+    total_gas = 0.0
+    total_battery = 0.0
+    total_solar = 0.0
+    total_batt_temp = 0.0
+
+    insight = ""
+
+    max_elec = float("-inf")
+    max_water = float("-inf")
+    max_gas = float("-inf")
+    min_battery = float("-inf")
+
+    for s in all_sensors:
+        #Accumulate all averages
+        if s.electricityload_value is not None: #existence checks
+            total_elec += s.electricityload_value
+        if s.water_usage is not None:
+            total_water += s.water_usage
+        if s.gas_usage is not None:
+            total_gas += s.gas_usage
+        if s.battery_charge is not None:
+            total_battery += s.battery_charge
+        if s.solar_output is not None:
+            total_solar += s.solar_output
+        if s.battery_temperature is not None:
+            total_batt_temp += s.battery_temperature
+
+        #Calculate max and min values
+        if s.electricityload_value is not None and s.electricityload_value > max_elec:
+            max_elec = s.electricityload_value
+        if s.water_usage is not None and s.water_usage > max_water:
+            max_water = s.water_usage
+        if s.gas_usage is not None and s.gas_usage > max_gas:
+            max_gas = s.gas_usage
+        if s.battery_charge is not None and s.battery_charge < min_battery:
+            min_battery = s.battery_charge
+
+    #Calculate averages
+    avg_elec = round(total_elec / n, 1)
+    avg_water = round(total_water / n, 1)
+    avg_gas = round(total_gas / n, 1)
+    avg_battery = round(total_battery / n, 1)
+    avg_solar = round(total_solar / n, 1)
+    avg_batt_temp = round(total_batt_temp / n, 1)
+
+    #Handle cases where values are None
+    if max_elec == float("-inf"):
+        max_elec = 0
+    if max_water == float("-inf"):
+        max_water = 0
+    if max_gas == float("-inf"):
+        max_gas = 0
+    if min_battery == float("inf"):
+        min_battery = 0
+
+    #Insight conditions
+    #1)High electricity load
+    if avg_elec > 0 and latest.electricityload_value and latest.electricityload_value > (avg_elec * 1.5):
+        insight += (
+            "Your current electricity load ({}W) is significantly above average ({}W). "
+            "Considering unplugging non-essential devices or scheduling high power-drawing appliances "
+            "to run during off-peak hours, reducing the strain on your system!"
+        ).format(latest.electricityload_value, avg_elec)
+
+    #2)Water usage spike
+    elif avg_water > 0 and latest.water_usage and latest.water_usage > (avg_water * 2.0):
+        insight += (
+            "Your water usage has spiked to {}L, which is double your {}L average! "
+            "Consider checking for dripping faucets and irrigation leaks."
+        ).format(latest.water_usage, avg_water)
+    
+    #3)Gas usage spike
+    elif avg_gas > 0 and latest.gas_usage and latest.gas_usage > (avg_gas * 1.5):
+        insight += (
+            "Your gas usage is unusally high {}L, compared to your {}L average. "
+            "If it's cold, try putting on some extra layers before turning up the heat."
+        ).format(latest.gas_usage, avg_gas)
+
+    #4)Battery critically low
+    elif latest.battery_charge is not None and latest.battery_charge < 20:
+        insight += (
+            "Your battery charge is critically low at {}%. You should considering "
+            "reducing non-essential appliance usage and letting your solar panels recharge "
+            "before running any heavy loads."
+        ).format(latest.battery_charge)
+
+    #5)Solar output high
+    elif (latest.battery_temperature is not None and latest.battery_charge is not None
+          and latest.solar_output > (latest.battery_charge * 1.2)
+          and latest.solar_output > 100):
+        insight += (
+            "Your solar panels are outputting {}W! Thats a lot! "
+            "Consider doing a load of washing now, and running other high-load appliances!"
+        ).format(latest.solar_output)
+    
+    #6)Battery temperature too high
+    elif (latest.battery_temperature is not None and latest.battery_temperature > 40):
+        insight += (
+            "Your battery temperature is {}°C, which is above the ideal 20-30°C range. "
+            "Heat reduces battery lifespan!"
+        ).format(latest.battery_temperature)
+
+    #7)Solar output dipping and battery low
+    elif (latest.solar_output is not None and latest.battery_charge is not None
+          and latest.solar_output < 50 and latest.battery_charge < 50):
+        insight += (
+            "Solar output is dropping ({}W) and battery is at {}%. "
+            "Start conserving energy for the evening, to avoid draining the battery over night"
+        ).format(latest.solar_output, latest.battery_charge)
+
+    #8)Efficiency tip: Battery below average despite good solar
+    elif (avg_battery > 0 and latest.battery_charge is not None and latest.solar_output is not None
+          and latest.battery_charge < avg_battery and latest.solar_output > 200):
+        insight += (
+            "Your battery ({}%) is below average ({}%) despite good solar ({}W). "
+            "Consider checking if your charge controller is working correctly."
+        ).format(latest.battery_charge, avg_battery, latest.solar_output)
+
+    #9)Normal - no proper insights
+    else:
+        insight += (
+            "All sensors appear to be outputting normal data! "
+            "Keep up the utility efficient habits!"
+        )
+
+    return JsonResponse({"insight": insight})
+
 #Return dashboard.html on page visit (with context from doDashboardLogic()).
 @never_cache #auto injects headers that tell the browser nothing is stored cache
 def dashboard(request):

@@ -14,5 +14,7 @@ urlpatterns = [
     path("setRanEnd", views.setRanEnd, name="setRanEnd"),
     path("setFilter", views.setFilter, name="setFilter"),
     path("doRDDLogic", views.doRDDLogic, name="doRDDLogic"),
-    path("doBreakdownLogic", views.doBreakdownLogic, name="doBreakdownLogic")
+    path("doBreakdownLogic", views.doBreakdownLogic, name="doBreakdownLogic"),
+    path("batteryStats", views.batteryStats, name="batteryStats"),
+    path("insightLogic", views.insightLogic, name="insightLogic")
 ]

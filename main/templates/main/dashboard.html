@@ -165,16 +165,25 @@
         <div id="col2">
             <div class="stack-area-wrapper">
                 <div class="stack-insights-wrapper">
-                    <script>
-                        {{ insights_api }}
-                    </script>
+                    <div class="insights-heading work-sans-regular">
+                        <p>Personalised Insights</p>
+                    </div>
+                    <div class="insight-data work-sans-regular" style="grid-row: 2;">
+                        <p id="insight_data_text">-</p>
+                    </div>
                 </div>
             </div>
             <div class="stack-area-wrapper">
-                <div class="stack-stats-wrapper">
-                    <script>
-                        {{ stats_api }}
-                    </script>
+                <div class="stack-stats-wrapper work-sans-regular" style="display: grid;">
+                    <div style="grid-row: 1; grid-column: 1;">
+                        <p class="stats-heading">Battery Statistics</p>
+                    </div>
+                    <div class="stats-breakdown" style="grid-row: 2; grid-column: 1; display: grid;">
+                        <p class="stats-breakdown-left-col" style="grid-row: 1; grid-column: 1; padding-bottom: 4vh;">Output Power: <span id="battery_output_val">-</span>W</p>
+                        <p class="stats-breakdown-right-col" style="grid-row: 1; grid-column: 2; padding-bottom: 4vh;">Output Voltage: <span id="battery_voltage_val">-</span>V</p>
+                        <p class="stats-breakdown-left-col" style="grid-row: 2; grid-column: 1; padding-bottom: 6vh;">Current Charge: <span id="battery_charge_val">-</span>%</p>
+                        <p class="stats-breakdown-right-col" style="grid-row: 2; grid-column: 2; padding-bottom: 6vh;">Output Temperature: <span id="battery_temperature_val">-</span>°C</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -274,7 +283,7 @@
 
 
             .bg-img{
-                background-size: 110% 120%;
+                background-size: 110% 170%;
                 background-repeat: no-repeat;
                 background-position: center;
                 position: absolute;
@@ -337,11 +346,11 @@
             /* Graph canvas */
 
             .graph { /*Theres a load of errors for me here, I can't do anything about them. Django var passing, that whole ordeal...*/
+                display: block;
                 width: {{ graphWidth }} !important;
                 height: {{ graphHeight }} !important;
                 max-width: {{ graphWidth }} !important;
                 max-height: {{ graphHeight }} !important;
-                display: block;
             }
 
             .breakdown-area-wrapper {
@@ -352,6 +361,7 @@
                 align-items: stretch;
                 margin-left: 50px;
                 border-radius: 12px;
+                margin-bottom: 3vh;
                 height: {{ graphHeight }};
             }
 
@@ -359,11 +369,13 @@
                 border-collapse: collapse;
                 width: 100%;
                 font-size: 14pt;
+                margin-top: 2vh;
             }
 
             .weather-table th, .weather-table td {
                 border: none;
                 padding: 4px 8px;
+                padding-bottom: 12px;
                 text-align: center;
                 background-color: transparent;
             }
@@ -395,7 +407,7 @@
                 background: #ffffff;
                 border-radius: 35px;
                 padding: 25px;
-                display: flex;
+                display: grid;
                 justify-content: center;
                 align-items: center;
                 text-align: center;
@@ -404,6 +416,15 @@
                 min-height: 50vh;
                 margin-top: 2vh;
                 margin-bottom: 4vh;
+                font-size: 13pt;
+            }
+
+            .insights-heading {
+                font-weight: bold;
+            } 
+
+            .insight-data {
+                min-height: 40vh;
             }
 
             /* Statistics styling */
@@ -422,7 +443,28 @@
                 box-shadow: 0 5px 18px rgba(0,0,0,.15);
             }
 
+            .stats-heading {
+                font-size: 13pt;
+                font-weight: bold;
+                padding-top: 2vh;
+            }
 
+            .stats-breakdown {
+                font-size: 13pt;
+                max-height: 15vh;
+                margin-bottom: 5vh;
+            }
+
+            .stats-breakdown-left-col {
+                padding-right: 1vw;
+                width: 115%;
+                padding-left: 1vw;
+            }
+
+            .stats-breakdown-right-col {
+                padding-left: 1vw;
+                width: 80%;
+            }
 
 
             /* ------RESPONSIVE STYLING STUFF------ */
@@ -514,6 +556,22 @@
     refreshBreakdown();
   }
 
+  async function refreshInsights() {
+    const res = await fetch("/insightLogic")
+    const json = await res.json();
+    document.getElementById('insight_data_text').textContent = json.insight ?? "-";
+    
+  }
+
+  async function refreshStats() {
+    const res = await fetch("/batteryStats");
+    const json = await res.json();
+    document.getElementById('battery_output_val').textContent = json.battery_output ?? "-";
+    document.getElementById('battery_voltage_val').textContent = json.battery_voltage ?? "-";
+    document.getElementById('battery_charge_val').textContent = json.battery_charge ?? "-";
+    document.getElementById('battery_temperature_val').textContent = json.battery_temperature ?? "-";
+  }
+
   async function refreshBreakdown() {
     const res = await fetch("/doBreakdownLogic"); //API endpoint
     const json = await res.json();
@@ -592,6 +650,8 @@
       throw new Error(`POST failed: ${res.status} ${text}`);
     }
     refreshTable()
+    refreshStats()
+    refreshInsights()
   }
 
   async function postFilterContext(n) {
@@ -613,6 +673,8 @@
       throw new Error(`POST failed: ${res.status} ${text}`);
     }
     refreshTable()
+    refreshStats()
+    refreshInsights()
   }
 
   //Django CSRF read from cookie
@@ -641,6 +703,8 @@
         credentials: "same-origin"
     })
     await refreshTable();
+    await refreshStats();
+    await refreshInsights();
   };
   window.Filter = async function Filter() { //Actual function thats called by the button
     const n = nextFilterCounter();
@@ -655,6 +719,8 @@
         credentials: "same-origin"
     })
     await refreshTable();
+    await refreshStats();
+    await refreshInsights();
   };
 
   let filterDebounceTimer = null; //Timer to prevent calling twice
@@ -684,6 +750,8 @@
         throw new Error(`POST failed: ${res.status} ${text}`);
         }
         await refreshTable();
+        await refreshStats();
+        await refreshInsights();
     }, 300);
   }
 
@@ -711,6 +779,8 @@
         throw new Error(`POST failed: ${res.status} ${text}`);
         }
         await refreshTable();
+        await refreshStats();
+        await refreshInsights();
     }, 300);
   }
 
@@ -738,6 +808,8 @@
         throw new Error(`POST failed: ${res.status} ${text}`);
         }
         await refreshTable();
+        await refreshStats();
+        await refreshInsights();
     }, 300);
   }
 
