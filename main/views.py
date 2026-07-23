@@ -59,6 +59,7 @@ def signup(request):
         email = request.POST.get("email")
         password = request.POST.get("password")
         name = request.POST.get("name")
+        security_question = request.POST.get("security_question")
         regex = r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,7}"
         try:
             if re.fullmatch(regex, email) == None:
@@ -69,11 +70,14 @@ def signup(request):
             return render(request, "main/index.html", {"error":"You must enter a password."})
         if name == "":
             return render(request, "main/index.html", {"error":"You must enter a name."})
+        if security_question == "":
+            return render(request, "main/index.html", {"error":"You must answer the security question!"})
 
         UserDetails.objects.create(
             email=email,
             password=password,
-            name=name
+            name=name,
+            security_question=security_question
         )
 
         return redirect("signup") #Reload page after saving to database
@@ -506,7 +510,7 @@ def insightLogic(request):
           and latest.solar_output > (latest.battery_charge * 1.2)
           and latest.solar_output > 100):
         insight += (
-            "Your solar panels are outputting {}W! Thats a lot! "
+            "Your solar panels are outputting {}W! That's a lot! "
             "Consider doing a load of washing now, and running other high-load appliances!"
         ).format(latest.solar_output)
     
@@ -522,7 +526,7 @@ def insightLogic(request):
           and latest.solar_output < 50 and latest.battery_charge < 50):
         insight += (
             "Solar output is dropping ({}W) and battery is at {}%. "
-            "Start conserving energy for the evening, to avoid draining the battery over night"
+            "Start conserving energy for the evening, to avoid draining the battery over night."
         ).format(latest.solar_output, latest.battery_charge)
 
     #8)Efficiency tip: Battery below average despite good solar

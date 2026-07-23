@@ -88,7 +88,14 @@ html, body { height: 100%; margin: 0; }
     font-size: 14pt;
 }
 
-.password-field {
+.security-title {
+    display: block;
+    padding-top: 15px;
+    padding-bottom: 5px;
+    font-size: 14pt;
+}
+
+.password-field, .security-field {
     right: 5px;
     background: #ffffff;
     box-sizing: border-box;
@@ -98,6 +105,7 @@ html, body { height: 100%; margin: 0; }
     padding-bottom: 15px;
     padding-right: 10px;
     padding-left: 10px;
+    margin-bottom: 2vh;
 }
 
 input:focus {

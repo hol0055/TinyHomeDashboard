@@ -30,6 +30,10 @@ https://stackoverflow.com/a/61342918
 Classes python
 https://www.w3schools.com/python/python_encapsulation.asp
 
+Cookies Django
+https://docs.djangoproject.com/en/6.0/ref/request-response/#django.http.HttpRequest.get_signed_cookie
+https://docs.djangoproject.com/en/6.0/ref/request-response/#django.http.HttpResponse.set_signed_cookie
+
 database changes are applied like so:
 python manage.py makemigrations {app_name}
 python manage.py migrate
