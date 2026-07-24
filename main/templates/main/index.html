@@ -34,7 +34,7 @@
             <label class="password-title work-sans-regular">Password</label>
             <input class="password-field" type="password" name="password">
             <br>
-            <a href="#signup" class="password-reset work-sans-regular">Forgot Password</a></p>
+            <a href="#" onclick="ResetPassword(event)" class="password-reset work-sans-regular">Forgot Password</a></p>
             <br><br><br><br><br>
             <button type="login" class="login-button">Login</button>
             <br><br><br><br>
@@ -62,9 +62,29 @@
             <a href="#" onclick="LogIn(event)" class="work-sans-regular">Login</a></p>
           </form>
         </div>
+        <div id="reset-box" class="reset-box">
+          <h2 style="font-size: 22pt; text-align:center; color: #000000;" class="work-sans-regular">Reset Password</h2>
+          <form method="POST" action="{% url 'passwordReset' %}">
+            {% csrf_token %}
+            <label class="email-title work-sans-regular">Email</label>
+            <input class="email-field" type="email" name="email">
+            <label class="security-title work-sans-regular">What high school did you go to?</label>
+            <input class="security-field" type="security_question" name="security_question">
+            <br><br><br>
+            <button type="submit" class="login-button" style="width: 11vw;">Recover Password</button>
+            <br><br>
+            <p class="login-title work-sans-regular" style="margin-top: 6vh;">Remembered your password?
+            <a href="#" onclick="LogIn(event)" class="work-sans-regular">Login</a></p>
+          </form>
+        </div>
       </div>
-
-      {% if error %} <!--Error banner, only -->
+      {% if password_reset_done %} <!--Password reset banner -->
+        <div id="error-banner" class="error-banner" style="background: #00bbcb;">
+          <p class="error-message work-sans-regular">Your password is: {{ recovered_password}}
+          <a href="#" onclick="CloseBanner(event)" class="work-sans-regular">X</a></p>
+        </div>
+      {% endif %}
+      {% if error %} <!--Error banner -->
         <div id="error-banner" class="error-banner">
           <p class="error-message work-sans-regular">{{ error }}
           <a href="#" onclick="CloseBanner(event)" class="work-sans-regular">X</a></p>
@@ -82,8 +102,10 @@
     event.preventDefault(); // Prevents the page from jumping
     const logInDiv = document.getElementById("login-box");
     const signUpDiv = document.getElementById("signup-box");
+    const resetDiv = document.getElementById("reset-box");
     logInDiv.style.display = "none";
     signUpDiv.style.display = "block";
+    resetDiv.style.display = "none";
   }
 
   
@@ -91,8 +113,20 @@
     event.preventDefault(); // Prevents the page from jumping
     const logInDiv = document.getElementById("login-box");
     const signUpDiv = document.getElementById("signup-box");
+    const resetDiv = document.getElementById("reset-box");
     logInDiv.style.display = "block";
     signUpDiv.style.display = "none";
+    resetDiv.style.display = "none";
+  }
+
+  function ResetPassword(event) {
+    event.preventDefault(); // Prevents the page from jumping
+    const logInDiv = document.getElementById("login-box");
+    const signUpDiv = document.getElementById("signup-box");
+    const resetDiv = document.getElementById("reset-box");
+    logInDiv.style.display = "none";
+    signUpDiv.style.display = "none";
+    resetDiv.style.display = "block";
   }
 
   function CloseBanner(event) { //Function to handle error banner 'closing' (hiding from user)
@@ -107,6 +141,9 @@
     display: block;
   }
   #signup-box{
+    display: none;
+  }
+  #reset-box{
     display: none;
   }
 </style>

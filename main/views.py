@@ -123,6 +123,27 @@ def logout(request):
         return response
     return redirect("/")
 
+def passwordReset(request):
+    if request.method == "POST":
+        email = request.POST.get("email")
+        security_question = request.POST.get("security_question")
+        try:
+            user = UserDetails.objects.get(email=email)
+            if user.security_question.lower() == security_question.lower():
+                return render(request, "main/index.html", {
+                    "password_reset_done": True,
+                    "recovered_password": user.password
+                })
+            else:
+                return render(request, "main/index.html", {
+                    "error": "Security answer is incorrect."
+                })
+        except UserDetails.DoesNotExist:
+            return render(request, "main/index.html", {
+                "error": "No account found with that email."
+            })
+    return render(request, "main/index.html")
+
 #Take range's start value for RawDataDisplay's filter, update database with those values, call doDashboardLogic() and return dashboard.html
 def setRanStart(request):
     if request.method =="POST":
@@ -199,6 +220,21 @@ def rdd_filter(list, f_type, filter='None', ranStart=0, ranEnd=100):
             f.write(str(filtered_list))
         return filtered_list
 
+def selection_sort_value(items, key=lambda x: x, reverse=False):
+    length = len(items)
+    
+    for i in range(length):
+        target = i
+        for j in range(i+1, length):
+            if reverse:
+                if key(items[j]) > key(items[target]):
+                    target = j
+            else:
+                if key(items[j]) < key(items[target]):
+                    target = j
+        if target != i:
+            items[i], items[target] = items[target], items[i]
+    return items
 
 def dictKey(key, element):
     return element[key]
@@ -210,15 +246,15 @@ def dictKeyDT(key, element):
 def rdd_sort(list, sort_type):
     match sort_type:
         case "Latest":
-            return sorted(list, key=lambda x: dictKeyDT("date_time", x))
+            return selection_sort_value(list, key=lambda x: dictKeyDT("date_time", x))
         case "Oldest":
-            return sorted(list, key=lambda x: dictKeyDT("date_time", x), reverse=True)
+            return selection_sort_value(list, key=lambda x: dictKeyDT("date_time", x), reverse=True)
         case "Value Ascending":
-            return sorted(list, key=lambda x: dictKey("value", x))
+            return selection_sort_value(list, key=lambda x: dictKey("value", x))
         case "Value Descending":
-            return sorted(list, key=lambda x: dictKey("value", x), reverse=True)
+            return selection_sort_value(list, key=lambda x: dictKey("value", x), reverse=True)
         case "Alphabetical":
-            return sorted(list, key=lambda x: dictKey("type", x))
+            return selection_sort_value(list, key=lambda x: dictKey("type", x))
 
 class GraphHandler: #Class to handle graph generation and retention
     def __init__(self):
