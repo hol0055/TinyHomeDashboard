@@ -17,5 +17,7 @@ urlpatterns = [
     path("doBreakdownLogic", views.doBreakdownLogic, name="doBreakdownLogic"),
     path("batteryStats", views.batteryStats, name="batteryStats"),
     path("insightLogic", views.insightLogic, name="insightLogic"),
-    path("passwordReset", views.passwordReset, name="passwordReset")
+    path("passwordReset", views.passwordReset, name="passwordReset"),
+    path("logSensorData", views.logSensorData, name="logSensorData"),
+    path("pullWeatherData", views.pullWeatherData, name="pullWeatherData")
 ]

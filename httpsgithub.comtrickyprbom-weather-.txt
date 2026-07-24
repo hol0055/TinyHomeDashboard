@@ -1,0 +1,13 @@
+https://github.com/trickypr/bom-weather-docs/blob/main/docs/forecasts.md
+
+def GetWeather(request):
+	WeatherPulled.objects…
+	
+
+
+$response = Invoke-RestMethod https://api.weather.bom.gov.au/v1/locations/r1r0fu/forecasts/daily
+for entry in weather_entries:
+	$response.data[n].getvalue(date)
+	search all table for entry col classified as 'Mon', ect
+	#set values within that col
+	weather_entires.Date()

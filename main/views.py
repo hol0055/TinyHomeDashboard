@@ -9,6 +9,7 @@ from .models import SensorDetails
 from .models import Misc
 from .models import WeatherPulled
 from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt #Used to mark a view function as being exempt from CSRF view protection
 
 import re
 import json
@@ -726,3 +727,38 @@ options: {{
 }}
 }});
 '''
+
+@csrf_exempt
+def logSensorData(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body.decode("utf-8"))
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            return JsonResponse({"error": "Invalid JSON payload."})
+
+        SensorDetails.objects.create(
+            date_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            battery_charge = data.get("battery_charge"),
+            battery_voltage = data.get("battery_voltage"),
+            battery_output = data.get("battery_output"),
+            battery_temperature = data.get("battery_temperature"),
+            solar_output = data.get("solar_output"),
+            electricityload_value = data.get("electricityload_value"),
+            water_usage = data.get("water_usage"),
+            gas_usage = data.get("gas_usage")
+        )
+
+        return JsonResponse({"success": True, "message": "Sensor data added."}, status=201)
+    return JsonResponse({"error": "POST required."}, status=405)
+
+import requests
+
+def pullWeatherData(request):
+    if request.method == "GET": #Pull forecast for Melbourne (r1r0fu) from the Bureau of Meteorology
+        url = 'https://api.weather.bom.gov.au/v1/locations/r1r0fu/forecasts/daily'
+        response = requests.get(url)
+        response.json
+        with open("example.txt", "w") as file:
+            file.write(f"{str(response.json)}")
+        return redirect("")
+    return redirect("")
